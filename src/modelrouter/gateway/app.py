@@ -14,6 +14,7 @@ A named model (a deployment, or a router model name) skips routing and fallback.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 import time
@@ -317,6 +318,9 @@ class Gateway:
         if cacheable:
             key = cache_key(
                 {
+                    # Per tenant: a shared entry would reveal (via $0 cost and latency) that
+                    # another tenant sent the same prompt.
+                    "tenant": tenant.name,
                     "tenant_lambda": tenant.default_lambda,
                     **req.model_dump(exclude={"user", "stream"}, by_alias=True),
                 }
@@ -401,6 +405,8 @@ class Gateway:
                 async with asyncio.timeout(max(0.001, deadline - time.monotonic())):
                     first = await it.__anext__()
             except (ProviderError, TimeoutError, StopAsyncIteration) as exc:
+                with contextlib.suppress(Exception):
+                    await it.aclose()  # type: ignore[attr-defined]
                 kind = exc.kind if isinstance(exc, ProviderError) else "timeout"
                 attempts.append(
                     Attempt(d.name, f"error:{kind}", (time.perf_counter() - start) * 1e3)

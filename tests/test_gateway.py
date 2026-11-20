@@ -238,3 +238,19 @@ def test_fault_injection_endpoint_is_off_unless_enabled():
             "/admin/faults", json={"deployment": "strong-dep", "failure_rate": 1}, headers=AUTH
         )
     assert r.status_code == 404
+
+
+def test_cache_is_per_tenant():
+    other = Tenant(name="other", key_sha256=Tenant.hash_key("sk-other"), daily_budget_usd=1.0)
+    cfg = make_config()
+    cfg.tenants.append(other)
+    gw, providers = make_gateway(cfg, cache_ttl_s=60)
+    with client_for(gw) as c:
+        c.post("/v1/chat/completions", json=chat("easy", temperature=0), headers=AUTH)
+        r = c.post(
+            "/v1/chat/completions",
+            json=chat("easy", temperature=0),
+            headers={"Authorization": "Bearer sk-other"},
+        )
+    assert r.json()["routing"]["cache_hit"] is False
+    assert providers["cheap-dep"].calls == 2
