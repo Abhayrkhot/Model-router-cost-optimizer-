@@ -1,0 +1,50 @@
+# Gateway over RouterBench replay: every deployment answers with the response that model really
+# gave to the prompt (recorded in the fixture), so end-to-end quality and cost can be checked
+# against the offline evaluation.  Latencies are rough per-model figures for load tests.
+router_dir: ../artifacts/routers/knn-mlp-random-s0
+replay_fixture: ../artifacts/replay/random-s0-test.jsonl.gz
+decision_log: ../artifacts/logs/decisions.jsonl
+cache_ttl_s: 0
+fault_injection: true
+request_deadline_s: 30
+max_attempts: 3
+embed_threads: 4
+batch_max_size: 32
+batch_max_wait_ms: 2
+breaker:
+  failure_threshold: 5
+  reset_after_s: 5
+
+model_map:
+  gpt-4-1106-preview: gpt-4-1106-preview
+  claude-v2: claude-v2
+  claude-v1: claude-v1
+  claude-instant-v1: claude-instant-v1
+  gpt-3.5-turbo-1106: gpt-3.5-turbo-1106
+  yi-34b: yi-34b
+  mixtral-8x7b: mixtral-8x7b
+  llama-2-70b: llama-2-70b
+  codellama-34b: codellama-34b
+  wizardlm-13b: wizardlm-13b
+  mistral-7b: mistral-7b
+
+deployments:
+  - {name: gpt-4-1106-preview, provider: replay, upstream_model: gpt-4-1106-preview, max_retries: 1}
+  - {name: claude-v2, provider: replay, upstream_model: claude-v2, max_retries: 1}
+  - {name: claude-v1, provider: replay, upstream_model: claude-v1, max_retries: 1}
+  - {name: claude-instant-v1, provider: replay, upstream_model: claude-instant-v1, max_retries: 1}
+  - {name: gpt-3.5-turbo-1106, provider: replay, upstream_model: gpt-3.5-turbo-1106, max_retries: 1}
+  - {name: yi-34b, provider: replay, upstream_model: yi-34b, max_retries: 1}
+  - {name: mixtral-8x7b, provider: replay, upstream_model: mixtral-8x7b, max_retries: 1}
+  - {name: llama-2-70b, provider: replay, upstream_model: llama-2-70b, max_retries: 1}
+  - {name: codellama-34b, provider: replay, upstream_model: codellama-34b, max_retries: 1}
+  - {name: wizardlm-13b, provider: replay, upstream_model: wizardlm-13b, max_retries: 1}
+  - {name: mistral-7b, provider: replay, upstream_model: mistral-7b, max_retries: 1}
+
+tenants:
+  # key: sk-bench-local (sha256 below); replace for anything real.
+  - name: bench
+    key_sha256: 956569b80d84ca8717cfc99af8c29564c2160e8a8411876ac2f39b2b22dd7ca8
+    daily_budget_usd: 1000
+    requests_per_minute: 1000000
+    default_lambda: 300

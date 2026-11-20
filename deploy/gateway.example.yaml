@@ -1,0 +1,51 @@
+# Example production layout: a local model on vLLM/llama.cpp for the cheap tier and Claude for
+# the rest.  NOTE: a router only knows the models it was trained on.  The shipped artifact is
+# trained on RouterBench's 11 models; to route between *these* deployments, collect outcomes for
+# them in the routing-dataset format (prompts x models -> quality, cost) and retrain
+# (`modelrouter train`).  Prices are USD per million tokens.
+router_dir: /models/router
+redis_url: redis://redis:6379/0
+decision_log: /var/log/modelrouter/decisions.jsonl
+cache_ttl_s: 600
+request_deadline_s: 120
+max_attempts: 3
+embed_threads: 2
+
+model_map:
+  local-small: local-qwen
+  claude-haiku: claude-haiku
+  claude-sonnet: claude-sonnet
+  claude-opus: claude-opus
+
+deployments:
+  - name: local-qwen
+    provider: openai_compat
+    upstream_model: Qwen/Qwen2.5-7B-Instruct
+    base_url: http://vllm:8000/v1
+    timeout_s: 30
+  - name: claude-haiku
+    provider: anthropic
+    upstream_model: claude-haiku-5-5
+    api_key_env: ANTHROPIC_API_KEY
+    price_input_per_mtok: 0.10
+    price_output_per_mtok: 0.50
+  - name: claude-sonnet
+    provider: anthropic
+    upstream_model: claude-sonnet-5-5
+    api_key_env: ANTHROPIC_API_KEY
+    price_input_per_mtok: 2.0
+    price_output_per_mtok: 10.0
+  - name: claude-opus
+    provider: anthropic
+    upstream_model: claude-opus-5-5
+    api_key_env: ANTHROPIC_API_KEY
+    price_input_per_mtok: 4.0
+    price_output_per_mtok: 20.0
+    timeout_s: 300
+
+tenants:
+  - name: default
+    key_sha256: "<sha256 of the tenant's bearer key>"
+    daily_budget_usd: 50
+    requests_per_minute: 600
+    default_lambda: 300
