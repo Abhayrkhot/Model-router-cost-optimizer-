@@ -149,10 +149,10 @@ def build(results: Path, dataset_manifest: Path) -> tuple[str, dict[str, Any]]:
     lines += ["|---|---:|---:|"]
     for name in [*ROUTERS, "single-model"]:
         ci = s0["routers"][name]["metrics"].get("ci95") or {}
-        a = ci.get("cost_frac_at_95pct_quality")
-        b = ci.get("quality_minus_ref_at_10pct_cost")
-        fa = f"{100 * a[0]:.1f}–{100 * a[1]:.1f}%" if a else "–"
-        fb = f"{b[0]:+.3f} – {b[1]:+.3f}" if b else "–"
+        ci_cost = ci.get("cost_frac_at_95pct_quality")
+        ci_q = ci.get("quality_minus_ref_at_10pct_cost")
+        fa = f"{100 * ci_cost[0]:.1f}–{100 * ci_cost[1]:.1f}%" if ci_cost else "–"
+        fb = f"{ci_q[0]:+.3f} – {ci_q[1]:+.3f}" if ci_q else "–"
         lines.append(f"| {LABEL[name]} | {fa} | {fb} |")
 
     # --- two-model -----------------------------------------------------------------------
@@ -231,7 +231,8 @@ def build(results: Path, dataset_manifest: Path) -> tuple[str, dict[str, Any]]:
         lines += ["", "## Gateway end to end (replay)", ""]
         lines += [
             "Every test prompt sent through the running gateway (HTTP, micro-batched online "
-            "embedding, routing, replay upstreams). Compared with the offline policy at the same λ.",
+            "embedding, routing, replay upstreams), compared with the offline policy at the "
+            "same λ.",
             "",
             "| λ | Requests | OK | Decisions identical | Quality gateway / offline | "
             "Cost per 1k gateway / offline |",
