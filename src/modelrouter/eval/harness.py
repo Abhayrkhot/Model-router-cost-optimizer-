@@ -97,7 +97,10 @@ def summarize(
     out["targets"] = {}
     for frac in QUALITY_TARGETS:
         cost_t, _ = M.min_cost_reaching(ct, frac * q_ref_test)
-        entry_t: dict[str, Any] = {"cost_frac_curve": round(cost_t / c_ref_test, 4)}
+        entry_t: dict[str, Any] = {
+            "cost_frac_curve": round(cost_t / c_ref_test, 4),
+            "cost_frac_hull": round(M.hull_cost_reaching(ct, frac * q_ref_test) / c_ref_test, 4),
+        }
         _, lam_t = M.min_cost_reaching(cv, frac * q_ref_val)
         if np.isfinite(lam_t):
             c_at, q_at = ct.point_at(lam_t)
@@ -121,7 +124,14 @@ def summarize(
     for b in BUDGETS:
         q_curve, _ = M.best_quality_within(ct, b * c_ref_test)
         _, lam_b = M.best_quality_within(cv, b * c_ref_val)
-        entry: dict[str, Any] = {"quality_curve": round(q_curve, 4)}
+        hc, hq = M.upper_hull(ct.cost, ct.quality)
+        q_hull = float(M.hull_quality_at(hc, hq, np.array([b * c_ref_test]))[0])
+        if b * c_ref_test < hc[0]:
+            q_hull = float("nan")  # cheaper than the policy's cheapest point
+        entry: dict[str, Any] = {
+            "quality_curve": round(q_curve, 4),
+            "quality_hull": round(q_hull, 4),
+        }
         if np.isfinite(lam_b):
             c_at, q_at = ct.point_at(lam_b)
             entry |= {"quality": round(q_at, 4), "cost_frac": round(c_at / c_ref_test, 4)}
@@ -156,6 +166,10 @@ def summarize(
             ),
         }
 
+    out["curve"] = {
+        "cost": [float(f"{x:.6g}") for x in ct.cost],
+        "quality": [round(float(x), 5) for x in ct.quality],
+    }
     result = RouterResult(name=name, metrics=out, test_curve=ct)
 
     if two_model_score_test is not None:
@@ -166,6 +180,7 @@ def summarize(
             "strong": ref.strong,
             "weak": ref.weak,
             "apgr": round(M.apgr(c2, q_w, q_s), 4),
+            "pgr_curve": [round(float(x), 4) for x in M.pgr(c2, q_w, q_s)],
             "cpt50": round(M.cpt(c2, q_w, q_s, 0.5), 4),
             "cpt80": round(M.cpt(c2, q_w, q_s, 0.8), 4),
         }

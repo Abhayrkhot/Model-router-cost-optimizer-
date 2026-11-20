@@ -1,0 +1,418 @@
+{
+ "title": "modelrouter gateway",
+ "uid": "modelrouter",
+ "schemaVersion": 39,
+ "version": 1,
+ "time": {
+  "from": "now-15m",
+  "to": "now"
+ },
+ "refresh": "5s",
+ "panels": [
+  {
+   "type": "timeseries",
+   "title": "Requests / s by outcome",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 12,
+    "h": 8
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "reqps",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "normal"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum by (status) (rate(router_requests_total[1m]))",
+     "legendFormat": "{{status}}"
+    }
+   ]
+  },
+  {
+   "type": "timeseries",
+   "title": "Traffic share by deployment",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 12,
+    "h": 8
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "normal"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum by (deployment) (rate(router_routed_total[1m])) / ignoring(deployment) group_left sum(rate(router_routed_total[1m]))",
+     "legendFormat": "{{deployment}}"
+    }
+   ]
+  },
+  {
+   "type": "timeseries",
+   "title": "Spend (USD / hour) by deployment",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 8,
+    "w": 12,
+    "h": 8
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "currencyUSD",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10,
+      "stacking": {
+       "mode": "normal"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum by (deployment) (rate(router_cost_usd_total[5m])) * 3600",
+     "legendFormat": "{{deployment}}"
+    }
+   ]
+  },
+  {
+   "type": "timeseries",
+   "title": "Gateway latency",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 8,
+    "w": 12,
+    "h": 8
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 0,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "histogram_quantile(0.5, sum by (le) (rate(router_request_seconds_bucket[1m])))",
+     "legendFormat": "p50"
+    },
+    {
+     "refId": "B",
+     "expr": "histogram_quantile(0.99, sum by (le) (rate(router_request_seconds_bucket[1m])))",
+     "legendFormat": "p99"
+    }
+   ]
+  },
+  {
+   "type": "timeseries",
+   "title": "Router decision latency (embed + score)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 16,
+    "w": 12,
+    "h": 8
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 0,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "histogram_quantile(0.5, sum by (le) (rate(router_decision_seconds_bucket[1m])))",
+     "legendFormat": "p50"
+    },
+    {
+     "refId": "B",
+     "expr": "histogram_quantile(0.99, sum by (le) (rate(router_decision_seconds_bucket[1m])))",
+     "legendFormat": "p99"
+    }
+   ]
+  },
+  {
+   "type": "timeseries",
+   "title": "Upstream p99 by deployment",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 16,
+    "w": 12,
+    "h": 8
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "s",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 0,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "histogram_quantile(0.99, sum by (le, deployment) (rate(router_upstream_seconds_bucket[1m])))",
+     "legendFormat": "{{deployment}}"
+    }
+   ]
+  },
+  {
+   "type": "timeseries",
+   "title": "Failed upstream attempts / s",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 24,
+    "w": 12,
+    "h": 8
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "reqps",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 0,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum by (deployment, kind) (rate(router_attempt_errors_total[1m]))",
+     "legendFormat": "{{deployment}} {{kind}}"
+    }
+   ]
+  },
+  {
+   "type": "timeseries",
+   "title": "Fallbacks / s and open breakers",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 24,
+    "w": 12,
+    "h": 8
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 0,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(router_fallbacks_total[1m])",
+     "legendFormat": "fallbacks/s"
+    },
+    {
+     "refId": "B",
+     "expr": "sum(router_breaker_open)",
+     "legendFormat": "open breakers"
+    }
+   ]
+  },
+  {
+   "type": "timeseries",
+   "title": "Cache hit ratio",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prometheus"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 32,
+    "w": 12,
+    "h": 8
+   },
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 0,
+      "stacking": {
+       "mode": "none"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "list",
+     "placement": "bottom"
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(rate(router_cache_total{result=\"hit\"}[5m])) / sum(rate(router_cache_total[5m]))",
+     "legendFormat": "hit ratio"
+    }
+   ]
+  }
+ ],
+ "tags": [
+  "modelrouter"
+ ]
+}

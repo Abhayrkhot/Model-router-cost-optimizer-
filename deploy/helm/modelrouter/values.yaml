@@ -1,0 +1,47 @@
+image:
+  repository: ghcr.io/abhayrkhot/modelrouter-gateway
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+# Rendered to /etc/modelrouter/gateway.yaml.  router_dir must point at the mounted artifact.
+config:
+  router_dir: /models/router
+  redis_url: redis://modelrouter-redis:6379/0
+  request_deadline_s: 120
+  max_attempts: 3
+  cache_ttl_s: 600
+  embed_threads: 2
+  model_map: {}
+  deployments: []
+  tenants: []
+
+# Provider API keys (e.g. ANTHROPIC_API_KEY) come from an existing Secret.
+existingSecret: ""
+
+# Router artifact: a PVC or any volume source holding router.json + arrays.npz.
+routerVolume:
+  persistentVolumeClaim:
+    claimName: modelrouter-router
+
+resources:
+  requests: {cpu: "1", memory: 1Gi}
+  limits: {cpu: "2", memory: 2Gi}
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  minAvailable: 1
+
+service:
+  type: ClusterIP
+  port: 80
+
+serviceMonitor:
+  enabled: false
+  interval: 15s

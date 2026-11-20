@@ -130,3 +130,23 @@ def test_run_split_end_to_end(synthetic):
     assert par["cost_frac"] < 0.9
     lo, hi = knn["ci95"]["cost_frac_at_95pct_quality"]
     assert lo <= knn["targets"]["0.95"]["cost_frac_curve"] <= hi
+
+
+def test_saved_router_loads_in_a_fresh_interpreter(tmp_path, split_inputs):
+    """The gateway loads artifacts without importing the router modules itself."""
+    import subprocess
+    import sys
+
+    ds, _, _, parts = split_inputs
+    (xt, qt, sub), (xv, qv, _) = parts["train"], parts["val"]
+    qm = EnsembleQuality(
+        ds.models, [KNNQuality(ds.models), MLPQuality(ds.models, hidden=8, epochs=2)]
+    )
+    qm.fit(xt, qt, xv, qv)
+    save_router(tmp_path / "r", qm, CostModel(ds.models).fit(sub.prompt_chars, sub.cost), {})
+    code = (
+        "from pathlib import Path; from modelrouter.routers.base import load_router; "
+        f"qm, _, _ = load_router(Path({str(tmp_path / 'r')!r})); print(qm.kind)"
+    )
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
+    assert out.stdout.strip() == "ensemble"

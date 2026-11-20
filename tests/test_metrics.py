@@ -56,3 +56,10 @@ def test_bootstrap_ci_contains_the_point_estimate():
     lo, hi = M.bootstrap(c_rows, q_rows, lambda mc, mq: float(mq[0]), n_boot=300)
     assert lo < q_rows.mean() < hi
     assert hi - lo < 0.06
+
+
+def test_hull_cost_reaching_interpolates_between_hull_points():
+    c = _curve([1, 3], [0.5, 0.9])
+    assert M.hull_cost_reaching(c, 0.7) == pytest.approx(2.0)
+    assert M.hull_cost_reaching(c, 0.4) == 1.0
+    assert M.hull_cost_reaching(c, 0.95) == float("inf")

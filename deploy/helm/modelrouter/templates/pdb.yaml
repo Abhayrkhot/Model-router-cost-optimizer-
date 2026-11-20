@@ -1,0 +1,9 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "modelrouter.fullname" . }}
+  labels: {{- include "modelrouter.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels: {{- include "modelrouter.selector" . | nindent 6 }}

@@ -1,0 +1,12 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "modelrouter.fullname" . }}
+  labels: {{- include "modelrouter.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "modelrouter.selector" . | nindent 6 }}
+  endpoints:
+    - {port: http, path: /metrics, interval: {{ .Values.serviceMonitor.interval }}}
+{{- end }}

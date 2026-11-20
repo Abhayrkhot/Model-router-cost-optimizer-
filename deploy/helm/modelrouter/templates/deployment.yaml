@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "modelrouter.fullname" . }}
+  labels: {{- include "modelrouter.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels: {{- include "modelrouter.selector" . | nindent 6 }}
+  strategy:
+    rollingUpdate: {maxSurge: 1, maxUnavailable: 0}
+  template:
+    metadata:
+      labels: {{- include "modelrouter.selector" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ toYaml .Values.config | sha256sum }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile: {type: RuntimeDefault}
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: gateway
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["--config", "/etc/modelrouter/gateway.yaml", "--port", "8080"]
+          ports:
+            - {name: http, containerPort: 8080}
+          {{- if .Values.existingSecret }}
+          envFrom:
+            - secretRef: {name: {{ .Values.existingSecret }}}
+          {{- end }}
+          readinessProbe:
+            httpGet: {path: /readyz, port: http}
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet: {path: /healthz, port: http}
+            periodSeconds: 10
+            failureThreshold: 3
+          startupProbe:
+            httpGet: {path: /healthz, port: http}
+            periodSeconds: 2
+            failureThreshold: 60
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+          volumeMounts:
+            - {name: config, mountPath: /etc/modelrouter, readOnly: true}
+            - {name: router, mountPath: /models/router, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+      volumes:
+        - name: config
+          configMap: {name: {{ include "modelrouter.fullname" . }}}
+        - name: router
+          {{- toYaml .Values.routerVolume | nindent 10 }}
+        - name: tmp
+          emptyDir: {}

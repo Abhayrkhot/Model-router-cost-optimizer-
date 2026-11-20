@@ -1,0 +1,90 @@
+name: bench
+
+# Gateway load and fault tests on a clean runner (the dev box is shared, so its tail latencies
+# are noise).  Builds everything from the pinned data: prepare -> embed -> train -> replay
+# fixture -> gateway -> load generator.  Results are uploaded as an artifact.
+on:
+  workflow_dispatch:
+    inputs:
+      rates:
+        description: "Open-loop request rates to test (space-separated rps)"
+        default: "50 100 200 400"
+      duration:
+        description: "Seconds per rate"
+        default: "45"
+
+jobs:
+  bench:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install
+        run: uv sync --all-extras --frozen
+      - name: Hardware
+        run: |
+          nproc; free -g; lscpu | grep -E "Model name|^CPU\(s\)" || true
+      - name: Prepare data
+        run: uv run modelrouter data prepare
+      - name: Embed
+        run: uv run modelrouter embed
+      - name: Train router and build replay fixture
+        run: |
+          OMP_NUM_THREADS=4 uv run modelrouter train --router knn+mlp --split random-s0
+          uv run modelrouter gateway build-replay --split random-s0 --part test
+      - name: Start gateway
+        run: |
+          mkdir -p artifacts/logs results/load
+          nohup uv run modelrouter serve --config deploy/gateway.replay.yaml --port 18080 \
+            > artifacts/logs/gateway.log 2>&1 &
+          for i in $(seq 1 120); do curl -sf localhost:18080/readyz && break; sleep 1; done
+      - name: End-to-end decisions vs offline (closed loop, every test prompt)
+        run: |
+          mkdir -p results/e2e
+          for lam in 31.6 300; do
+            OMP_NUM_THREADS=4 uv run python bench/offline_point.py \
+              --router artifacts/routers/knn-mlp-random-s0 --lam $lam \
+              --out results/e2e/offline-lam$lam.json
+            uv run python bench/loadgen.py --fixture artifacts/replay/random-s0-test.jsonl.gz \
+              --url http://127.0.0.1:18080 --concurrency 32 --lam $lam \
+              --dump artifacts/logs/e2e-lam$lam.jsonl
+            uv run python bench/compare_e2e.py --offline results/e2e/offline-lam$lam.json \
+              --dump artifacts/logs/e2e-lam$lam.jsonl --out results/e2e/compare-lam$lam.json
+          done
+      - name: Router overhead and throughput (zero upstream latency)
+        run: |
+          for r in ${{ inputs.rates }}; do
+            uv run python bench/loadgen.py --fixture artifacts/replay/random-s0-test.jsonl.gz \
+              --url http://127.0.0.1:18080 --rate $r --duration ${{ inputs.duration }} \
+              --poisson --out results/load/rate-$r.json
+          done
+      - name: Outage of the most-used strong model with fallback
+        run: |
+          uv run python bench/loadgen.py --fixture artifacts/replay/random-s0-test.jsonl.gz \
+            --url http://127.0.0.1:18080 --rate 100 --duration 60 --lam 31.6 \
+            --fault gpt-4-1106-preview=1.0@20:40 --out results/load/outage-gpt4.json
+      - name: Same outage without fallback (max_attempts=1)
+        run: |
+          pkill -f "modelrouter serve" || true
+          sleep 2
+          nohup uv run modelrouter serve --config deploy/gateway.replay.yaml --port 18080 \
+            --max-attempts 1 > artifacts/logs/gateway-nofallback.log 2>&1 &
+          for i in $(seq 1 120); do curl -sf localhost:18080/readyz && break; sleep 1; done
+          uv run python bench/loadgen.py --fixture artifacts/replay/random-s0-test.jsonl.gz \
+            --url http://127.0.0.1:18080 --rate 100 --duration 60 --lam 31.6 \
+            --fault gpt-4-1106-preview=1.0@20:40 --out results/load/outage-gpt4-nofallback.json
+      - name: Gateway logs
+        if: always()
+        run: tail -50 artifacts/logs/gateway.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bench-results
+          path: |
+            results/load
+            results/e2e
+            artifacts/logs/gateway*.log

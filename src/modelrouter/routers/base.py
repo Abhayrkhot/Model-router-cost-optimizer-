@@ -148,6 +148,10 @@ def save_router(
 
 
 def load_router(directory: Path) -> tuple[QualityModel, CostModel, dict[str, Any]]:
+    # Router classes register on import; load them here so a fresh process (the gateway) can
+    # resolve any saved kind without the caller importing the right module first.
+    from modelrouter.routers import baselines, learned  # noqa: F401
+
     spec = json.loads((directory / "router.json").read_text())
     with np.load(directory / "arrays.npz", allow_pickle=False) as npz:
         arrays = {k: npz[k] for k in npz.files}

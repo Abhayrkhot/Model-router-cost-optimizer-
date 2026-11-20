@@ -34,6 +34,7 @@ import httpx
 
 @dataclass
 class Result:
+    sample_id: str
     t_sched: float
     latency_s: float
     status: int
@@ -82,7 +83,7 @@ class Run:
             "max_tokens": 512,
             "router": {"lambda": self.args.lam},
         }
-        res = Result(t_sched=t_s, latency_s=0.0, status=0)
+        res = Result(sample_id=row["sample_id"], t_sched=t_s, latency_s=0.0, status=0)
         try:
             r = await client.post("/v1/chat/completions", json=body)
             res.status = r.status_code
@@ -116,7 +117,7 @@ class Run:
         rng = random.Random(a.seed)
         order = list(range(len(self.rows)))
         rng.shuffle(order)
-        n = int(a.rate * a.duration)
+        n = int(a.rate * a.duration) if not a.concurrency else len(order)
         gaps = [rng.expovariate(a.rate) if a.poisson else 1.0 / a.rate for _ in range(n)]
         limits = httpx.Limits(
             max_connections=a.connections, max_keepalive_connections=a.connections
@@ -129,6 +130,19 @@ class Run:
             for i in range(min(20, len(order))):
                 await Run(a, self.rows).one(client, self.rows[order[i]], time.perf_counter(), 0.0)
             t0 = time.perf_counter() + 0.2
+            if a.concurrency:
+                # Closed loop: N workers, each sends its next request when the last one returns.
+                # For correctness runs (every prompt exactly once); latency is per-request.
+                queue = [self.rows[i] for i in order[: (n or len(order))]]
+
+                async def worker() -> None:
+                    while queue:
+                        row = queue.pop()
+                        await self.one(client, row, time.perf_counter(), 0.0)
+
+                await asyncio.gather(*(worker() for _ in range(a.concurrency)))
+                self.wall = time.perf_counter() - t0
+                return
             fault_task = asyncio.create_task(self.faults(client, t0)) if a.fault else None
             tasks = []
             t_s = 0.0
@@ -229,7 +243,14 @@ def main() -> None:
         help="deployment=rate@start:end (seconds into the run)",
     )
     p.add_argument("--limit", type=int, default=0, help="use only the first N fixture prompts")
+    p.add_argument(
+        "--concurrency",
+        type=int,
+        default=0,
+        help="closed loop with N workers instead of open-loop arrivals",
+    )
     p.add_argument("--out", type=Path)
+    p.add_argument("--dump", type=Path, help="write one JSON line per request")
     args = p.parse_args()
 
     with gzip.open(args.fixture, "rt", encoding="utf-8") as fh:
@@ -244,6 +265,11 @@ def main() -> None:
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(out, indent=1) + "\n")
+    if args.dump:
+        args.dump.parent.mkdir(parents=True, exist_ok=True)
+        with open(args.dump, "w") as fh:
+            for r in run.results:
+                fh.write(json.dumps(r.__dict__) + "\n")
 
 
 if __name__ == "__main__":

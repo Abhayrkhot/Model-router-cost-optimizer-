@@ -100,6 +100,18 @@ def aiq(c: Curve, lo: float, hi: float, log: bool = False, grid: int = 2048) -> 
     return float(np.trapezoid(vals, xs) / (hi - lo))
 
 
+def hull_cost_reaching(c: Curve, target: float) -> float:
+    """Cheapest cost at which the hull (randomised mixing of operating points) reaches target."""
+    hc, hq = upper_hull(c.cost, c.quality)
+    if target <= hq[0]:
+        return float(hc[0])
+    if target > hq[-1] + 1e-12:
+        return float("inf")
+    k = int(np.flatnonzero(hq >= target - 1e-12)[0])
+    t = (target - hq[k - 1]) / (hq[k] - hq[k - 1])
+    return float(hc[k - 1] + t * (hc[k] - hc[k - 1]))
+
+
 # --- point metrics (no mixing) --------------------------------------------------------------
 
 

@@ -184,6 +184,22 @@ def figures(
     typer.echo(f"wrote {out / 'figures'}")
 
 
+@app.command("report")
+def report(
+    results: Annotated[Path, typer.Option()] = Path("results"),
+    dataset: Annotated[Path, typer.Option()] = DATA_DIR / "processed" / "routerbench_0shot",
+    out: Annotated[Path, typer.Option()] = Path("docs") / "RESULTS.md",
+) -> None:
+    """Write docs/RESULTS.md and results/summary.json from results/*.json."""
+    from modelrouter.eval.report import build
+
+    text, summary = build(results, dataset / "manifest.json")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(text)
+    (results / "summary.json").write_text(json.dumps(_jsonable(summary), indent=1) + "\n")
+    typer.echo(f"wrote {out} and {results / 'summary.json'}")
+
+
 @app.command("train")
 def train(
     router: Annotated[str, typer.Option()] = "knn+mlp",
@@ -265,6 +281,9 @@ def serve(
     host: Annotated[str, typer.Option()] = "0.0.0.0",
     port: Annotated[int, typer.Option()] = 8080,
     log_level: Annotated[str, typer.Option()] = "warning",
+    max_attempts: Annotated[
+        int | None, typer.Option(help="Override max_attempts (1 disables fallback).")
+    ] = None,
 ) -> None:
     """Run the gateway (one process; scale out with replicas)."""
     import os
@@ -277,6 +296,8 @@ def serve(
     cfg = GatewayConfig.from_yaml(config)
     if os.environ.get("MODELROUTER_REDIS_URL"):
         cfg.redis_url = os.environ["MODELROUTER_REDIS_URL"]
+    if max_attempts is not None:
+        cfg.max_attempts = max_attempts
     uvicorn.run(create_app(cfg), host=host, port=port, log_level=log_level, access_log=False)
 
 

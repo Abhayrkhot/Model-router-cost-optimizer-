@@ -1,0 +1,6 @@
+apiVersion: v2
+name: modelrouter
+description: Quality-aware LLM routing gateway (OpenAI-compatible)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

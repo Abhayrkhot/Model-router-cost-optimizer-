@@ -1,0 +1,48 @@
+# Local stack: gateway (replay providers) + Redis (limits, cache) + Prometheus + Grafana.
+#   make artifacts   # router + replay fixture (see README)
+#   docker compose -f deploy/compose.yaml up --build
+name: modelrouter
+services:
+  redis:
+    image: redis:8.2-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: modelrouter-gateway:local
+    environment:
+      MODELROUTER_REDIS_URL: redis://redis:6379/0
+    command: ["--config", "/etc/modelrouter/gateway.yaml", "--port", "8080"]
+    volumes:
+      - ./gateway.compose.yaml:/etc/modelrouter/gateway.yaml:ro
+      - ../artifacts/routers:/models/routers:ro
+      - ../artifacts/replay:/models/replay:ro
+    ports: ["8080:8080"]
+    read_only: true
+    tmpfs: ["/tmp"]
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ["3000:3000"]
