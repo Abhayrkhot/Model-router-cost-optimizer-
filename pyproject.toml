@@ -41,7 +41,7 @@ dev = [
   "pytest>=8",
   "pytest-asyncio>=0.24",
   "respx>=0.21",
-  "fakeredis>=2.24",
+  "fakeredis[lua]>=2.24",
   "ruff>=0.6",
   "mypy>=1.11",
   "types-PyYAML",
@@ -72,7 +72,7 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "N", "PT", "ASYNC"]
-ignore = ["N803", "N806", "RUF001", "RUF002", "RUF003"]
+ignore = ["N803", "N806", "N812", "RUF001", "RUF002", "RUF003"]
 
 [tool.mypy]
 python_version = "3.12"

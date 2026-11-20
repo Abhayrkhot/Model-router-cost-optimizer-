@@ -11,9 +11,10 @@ PROCESSED = Path(__file__).resolve().parents[1] / "data" / "processed" / "router
 def make_synthetic(n: int = 600, seed: int = 0) -> RoutingDataset:
     """Three models where difficulty is visible in the text.
 
-    'easy' prompts are solved by every model, 'hard' ones only by the strong model; costs are
-    1, 3 and 10 units.  A good router should approach the strong model's quality at well under
-    its cost; a length heuristic can't, since length is independent of difficulty here.
+    'easy' prompts are solved equally often by every model, 'hard' ones mostly by the strong
+    model; costs are 1, 3 and 10 units.  A good router should approach the strong model's
+    quality at well under its cost; a length heuristic can't, since length is independent of
+    difficulty here.
     """
     rng = np.random.default_rng(seed)
     hard = rng.random(n) < 0.4
@@ -24,8 +25,8 @@ def make_synthetic(n: int = 600, seed: int = 0) -> RoutingDataset:
     ]
     quality = np.zeros((n, 3))
     quality[:, 2] = (rng.random(n) < np.where(hard, 0.9, 0.95)).astype(float)
-    quality[:, 1] = (rng.random(n) < np.where(hard, 0.3, 0.9)).astype(float)
-    quality[:, 0] = (rng.random(n) < np.where(hard, 0.05, 0.85)).astype(float)
+    quality[:, 1] = (rng.random(n) < np.where(hard, 0.3, 0.95)).astype(float)
+    quality[:, 0] = (rng.random(n) < np.where(hard, 0.05, 0.95)).astype(float)
     cost = np.tile([1.0, 3.0, 10.0], (n, 1)) * rng.uniform(0.8, 1.2, (n, 1))
     return RoutingDataset(
         sample_id=np.array([f"s{i}" for i in range(n)]),
