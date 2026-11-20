@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.DS_Store
+*.egg-info/
+dist/
+build/
+# downloaded datasets and trained models are reproducible from `make data` / `make train`
+/data/
+/artifacts/
+.env
