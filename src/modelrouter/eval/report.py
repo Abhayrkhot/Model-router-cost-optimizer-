@@ -248,6 +248,31 @@ def build(results: Path, dataset_manifest: Path) -> tuple[str, dict[str, Any]]:
             )
         summary["e2e"] = [json.loads(p.read_text()) for p in e2e]
 
+    fam_files = (
+        sorted((results / "e2e").glob("offline-lam*.json"))
+        if e2e or (results / "e2e").exists()
+        else []
+    )
+    for p in fam_files:
+        off = json.loads(p.read_text())
+        if "by_family" not in off:
+            continue
+        lines += ["", f"## Where the traffic goes (λ = {off['lambda']:g}, {s0['split']} test)", ""]
+        lines += [
+            f"Overall quality {off['quality']:.3f} at ${off['cost_per_1k_usd']:.3f} "
+            "per 1k prompts.",
+            "",
+            f"| Benchmark | Prompts | Quality | {REF} quality | Cost vs {REF} | Top models |",
+            "|---|---:|---:|---:|---:|---|",
+        ]
+        for fam, v in off["by_family"].items():
+            top = ", ".join(f"{m} {100 * x:.0f}%" for m, x in v["top_models"].items())
+            lines.append(
+                f"| {fam} | {v['n']:,} | {v['quality']:.3f} | {v['gpt4_quality']:.3f} | "
+                f"{100 * v['cost_frac_of_gpt4']:.0f}% | {top} |"
+            )
+        summary.setdefault("by_family", {})[str(off["lambda"])] = off["by_family"]
+
     load = sorted((results / "load").glob("*.json")) if (results / "load").exists() else []
     if load:
         lines += ["", "## Gateway load tests", ""]

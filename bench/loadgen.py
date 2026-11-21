@@ -176,7 +176,13 @@ class Run:
                 b["errors"] += 1
         return {
             "config": {
-                k: (v if not isinstance(v, list) else [f.__dict__ for f in v])
+                k: (
+                    [f.__dict__ for f in v]
+                    if isinstance(v, list)
+                    else str(v)
+                    if isinstance(v, Path)
+                    else v
+                )
                 for k, v in vars(self.args).items()
                 if k not in {"key"}
             },

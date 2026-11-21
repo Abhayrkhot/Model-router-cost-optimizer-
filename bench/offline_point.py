@@ -37,16 +37,32 @@ def main() -> None:
     c_hat = cm.predict(test.prompt_chars)
     choice = route(q_hat, c_hat, a.lam)
     rows = np.arange(len(test))
+    ref = test.model_index("gpt-4-1106-preview")
+    by_family = {}
+    for fam in sorted(set(test.family.tolist())):
+        idx = np.flatnonzero(test.family == fam)
+        shares = np.bincount(choice[idx], minlength=len(test.models)) / len(idx)
+        top = np.argsort(-shares)[:3]
+        by_family[fam] = {
+            "n": len(idx),
+            "quality": round(float(test.quality[idx, choice[idx]].mean()), 4),
+            "gpt4_quality": round(float(test.quality[idx, ref].mean()), 4),
+            "cost_frac_of_gpt4": round(
+                float(test.cost[idx, choice[idx]].sum() / test.cost[idx, ref].sum()), 4
+            ),
+            "top_models": {test.models[k]: round(float(shares[k]), 3) for k in top if shares[k]},
+        }
     out = {
         "lambda": a.lam,
         "n": len(test),
         "quality": float(test.quality[rows, choice].mean()),
         "cost_per_1k_usd": float(1000 * test.cost[rows, choice].mean()),
+        "by_family": by_family,
         "choices": {sid: test.models[c] for sid, c in zip(test.sample_id, choice, strict=True)},
     }
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(out) + "\n")
-    print(json.dumps({k: v for k, v in out.items() if k != "choices"}))
+    print(json.dumps({k: v for k, v in out.items() if k != "choices"}, indent=1))
 
 
 if __name__ == "__main__":
