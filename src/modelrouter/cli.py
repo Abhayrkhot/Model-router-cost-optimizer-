@@ -188,16 +188,20 @@ def figures(
 def figures_load(
     results: Annotated[Path, typer.Option()] = Path("results"),
 ) -> None:
-    """Draw the outage figure from results/load/outage-gpt4*.json (bench workflow output)."""
+    """Draw the outage figure from results/load/outage-*.json (bench workflow output)."""
     from modelrouter.eval import plots
 
-    with_fb = json.loads((results / "load" / "outage-gpt4.json").read_text())
-    without = json.loads((results / "load" / "outage-gpt4-nofallback.json").read_text())
-    fault = with_fb["config"]["fault"][0]
+    load = results / "load"
+    runs = [
+        ("Fallback + breakers", json.loads((load / "outage-full.json").read_text())),
+        ("Breakers only", json.loads((load / "outage-breaker-only.json").read_text())),
+        ("Neither", json.loads((load / "outage-none.json").read_text())),
+    ]
+    fault = runs[0][1]["config"]["fault"][0]
     for mode in ("light", "dark"):
         plots.outage_timeline(
             results / "figures" / f"outage_{mode}.png",
-            [("With fallback", with_fb), ("Without fallback", without)],
+            runs,
             (fault["start"], fault["end"]),
             "GPT-4 Turbo outage at 100 req/s (λ at the 95%-of-GPT-4 point)",
             mode,
@@ -307,6 +311,9 @@ def serve(
         int | None, typer.Option(help="Override max_attempts (1 disables fallback).")
     ] = None,
     router_dir: Annotated[Path | None, typer.Option(help="Override router_dir.")] = None,
+    no_fallback: Annotated[
+        bool, typer.Option(help="Baseline mode: first choice only, breakers never open.")
+    ] = False,
 ) -> None:
     """Run the gateway (one process; scale out with replicas)."""
     import os
@@ -323,6 +330,9 @@ def serve(
         cfg.max_attempts = max_attempts
     if router_dir is not None:
         cfg.router_dir = router_dir.resolve()
+    if no_fallback:
+        cfg.max_attempts = 1
+        cfg.breaker.failure_threshold = 1_000_000_000
     uvicorn.run(create_app(cfg), host=host, port=port, log_level=log_level, access_log=False)
 
 

@@ -73,22 +73,24 @@ jobs:
               --url http://127.0.0.1:18080 --rate $r --duration ${{ inputs.duration }} \
               --poisson --out results/load/rate-$r.json
           done
-      - name: Outage of the most-used strong model with fallback
+      - name: GPT-4 outage - full resilience (fallback + breakers)
         run: |
           uv run python bench/loadgen.py --fixture artifacts/replay/random-s0-test.jsonl.gz \
             --url http://127.0.0.1:18080 --rate 100 --duration 60 --lam 31.6 \
-            --fault gpt-4-1106-preview=1.0@20:40 --out results/load/outage-gpt4.json
-      - name: Same outage without fallback (max_attempts=1)
+            --fault gpt-4-1106-preview=1.0@20:40 --out results/load/outage-full.json
+      - name: GPT-4 outage - breakers only (max_attempts=1) and no resilience
         run: |
-          pkill -f "modelrouter serve" || true
-          sleep 2
-          nohup uv run modelrouter serve --config deploy/gateway.replay.yaml --port 18080 \
-            --router-dir artifacts/routers/bench --max-attempts 1 \
-            > artifacts/logs/gateway-nofallback.log 2>&1 &
-          for i in $(seq 1 120); do curl -sf localhost:18080/readyz && break; sleep 1; done
-          uv run python bench/loadgen.py --fixture artifacts/replay/random-s0-test.jsonl.gz \
-            --url http://127.0.0.1:18080 --rate 100 --duration 60 --lam 31.6 \
-            --fault gpt-4-1106-preview=1.0@20:40 --out results/load/outage-gpt4-nofallback.json
+          for mode in breaker-only none; do
+            pkill -f "modelrouter serve" || true
+            sleep 2
+            flag=$([ $mode = none ] && echo --no-fallback || echo --max-attempts 1)
+            nohup uv run modelrouter serve --config deploy/gateway.replay.yaml --port 18080 \
+              --router-dir artifacts/routers/bench $flag > artifacts/logs/gateway-$mode.log 2>&1 &
+            for i in $(seq 1 120); do curl -sf localhost:18080/readyz && break; sleep 1; done
+            uv run python bench/loadgen.py --fixture artifacts/replay/random-s0-test.jsonl.gz \
+              --url http://127.0.0.1:18080 --rate 100 --duration 60 --lam 31.6 \
+              --fault gpt-4-1106-preview=1.0@20:40 --out results/load/outage-$mode.json
+          done
       - name: Gateway logs
         if: always()
         run: tail -50 artifacts/logs/gateway.log

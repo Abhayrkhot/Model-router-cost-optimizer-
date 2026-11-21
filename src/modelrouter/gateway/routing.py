@@ -71,9 +71,9 @@ class RouterService:
         return [(q[i], c[i]) for i in range(len(items))]
 
     async def start(self) -> None:
-        self.batcher.start()
-        if self.embedder is not None:  # warm the ONNX session before taking traffic
-            await self.batcher.submit(("warm-up", 7))
+        if self.embedder is not None:
+            self.batcher.start()
+            await self.batcher.submit(("warm-up", 7))  # warm the ONNX session first
 
     async def stop(self) -> None:
         await self.batcher.stop()
@@ -87,7 +87,11 @@ class RouterService:
         max_cost_usd: float | None = None,
     ) -> Decision:
         start = time.perf_counter()
-        q, c = await self.batcher.submit((text, chars))
+        if self.embedder is None:
+            # Lexical routers score in ~0.1 ms: batching would only add its wait window.
+            q, c = self._score_batch([(text, chars)])[0]
+        else:
+            q, c = await self.batcher.submit((text, chars))
         mask = self.routable.copy()
         if allowed is not None:
             mask &= np.array([m in set(allowed) for m in self.models])
