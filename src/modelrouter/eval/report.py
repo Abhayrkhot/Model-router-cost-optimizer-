@@ -77,8 +77,9 @@ def build(results: Path, dataset_manifest: Path) -> tuple[str, dict[str, Any]]:
     lines += ["## Data", ""]
     lines += [
         f"{man['rows_out']:,} prompts × {len(man['models'])} models "
-        f"(RouterBench 0-shot @ `{man['source']['routerbench_revision'][:7]}`). "
-        f"Dropped: {man['dropped']}.",
+        f"(RouterBench 0-shot @ `{man['source']['routerbench_revision'][:7]}`). Dropped: "
+        + ", ".join(f"{k.replace('_', ' ')} {v}" for k, v in man["dropped"].items())
+        + ".",
         "",
         "| Family | Prompts |",
         "|---|---:|",
@@ -195,7 +196,8 @@ def build(results: Path, dataset_manifest: Path) -> tuple[str, dict[str, Any]]:
         lines += ["", "## Unseen benchmarks (leave one benchmark out)", ""]
         lines += [
             "Train on every other benchmark, test on the held-out one. Single seed. This is the "
-            "closer match to new production traffic.",
+            "closer match to new production traffic. q@10% and cost@95% are the best single "
+            "operating point (no mixing), for both policies.",
             "",
             "| Held out | Prompts | Router AIQ | Mix AIQ | Router q@10% | Mix q@10% | "
             "Router cost@95% | Mix cost@95% | APGR |",
@@ -210,10 +212,10 @@ def build(results: Path, dataset_manifest: Path) -> tuple[str, dict[str, Any]]:
                 "n": r["sizes"]["test"],
                 "aiq_router": rt["aiq_log"],
                 "aiq_mix": mx["aiq_log"],
-                "q10_router": _get(rt, "budgets", "0.1", "quality_hull"),
-                "q10_mix": _get(mx, "budgets", "0.1", "quality_hull"),
-                "c95_router": _get(rt, "targets", "0.95", "cost_frac_hull"),
-                "c95_mix": _get(mx, "targets", "0.95", "cost_frac_hull"),
+                "q10_router": _get(rt, "budgets", "0.1", "quality_curve"),
+                "q10_mix": _get(mx, "budgets", "0.1", "quality_curve"),
+                "c95_router": _get(rt, "targets", "0.95", "cost_frac_curve"),
+                "c95_mix": _get(mx, "targets", "0.95", "cost_frac_curve"),
                 "apgr": rt["two_model"]["apgr"],
             }
             table_lofo[fam] = row

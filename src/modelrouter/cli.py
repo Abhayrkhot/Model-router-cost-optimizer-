@@ -184,6 +184,27 @@ def figures(
     typer.echo(f"wrote {out / 'figures'}")
 
 
+@app.command("figures-load")
+def figures_load(
+    results: Annotated[Path, typer.Option()] = Path("results"),
+) -> None:
+    """Draw the outage figure from results/load/outage-gpt4*.json (bench workflow output)."""
+    from modelrouter.eval import plots
+
+    with_fb = json.loads((results / "load" / "outage-gpt4.json").read_text())
+    without = json.loads((results / "load" / "outage-gpt4-nofallback.json").read_text())
+    fault = with_fb["config"]["fault"][0]
+    for mode in ("light", "dark"):
+        plots.outage_timeline(
+            results / "figures" / f"outage_{mode}.png",
+            [("With fallback", with_fb), ("Without fallback", without)],
+            (fault["start"], fault["end"]),
+            "GPT-4 Turbo outage at 100 req/s (λ at the 95%-of-GPT-4 point)",
+            mode,
+        )
+    typer.echo(f"wrote {results / 'figures'}/outage_*.png")
+
+
 @app.command("report")
 def report(
     results: Annotated[Path, typer.Option()] = Path("results"),

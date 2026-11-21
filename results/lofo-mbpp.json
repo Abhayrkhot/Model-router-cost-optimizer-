@@ -1,0 +1,999 @@
+{
+ "split": "lofo-mbpp",
+ "sizes": {
+  "train": 32448,
+  "val": 3605,
+  "test": 425
+ },
+ "reference": {
+  "model": "gpt-4-1106-preview",
+  "strong": "gpt-4-1106-preview",
+  "weak": "mixtral-8x7b",
+  "small_medium_large": [
+   "mistral-7b",
+   "mixtral-8x7b",
+   "gpt-4-1106-preview"
+  ]
+ },
+ "single_models": {
+  "wizardlm-13b": {
+   "cost": 8.095270588235293e-05,
+   "quality": 0.3694
+  },
+  "claude-instant-v1": {
+   "cost": 0.0004815265882352937,
+   "quality": 0.6024
+  },
+  "claude-v1": {
+   "cost": 0.00427744,
+   "quality": 0.5976
+  },
+  "claude-v2": {
+   "cost": 0.0058386258823529425,
+   "quality": 0.6424
+  },
+  "gpt-3.5-turbo-1106": {
+   "cost": 0.00033465647058823533,
+   "quality": 0.6518
+  },
+  "gpt-4-1106-preview": {
+   "cost": 0.009380705882352947,
+   "quality": 0.6871
+  },
+  "codellama-34b": {
+   "cost": 0.00015623344941176465,
+   "quality": 0.5153
+  },
+  "llama-2-70b": {
+   "cost": 0.0002972964705882353,
+   "quality": 0.3294
+  },
+  "mistral-7b": {
+   "cost": 4.850635294117648e-05,
+   "quality": 0.3435
+  },
+  "mixtral-8x7b": {
+   "cost": 0.000174275294117647,
+   "quality": 0.5412
+  },
+  "yi-34b": {
+   "cost": 0.0002284687058823532,
+   "quality": 0.3859
+  }
+ },
+ "routers": {
+  "oracle": {
+   "metrics": {
+    "aiq": 0.8641,
+    "aiq_log": 0.83,
+    "max_quality": 0.8659,
+    "max_quality_cost_frac": 0.125,
+    "targets": {
+     "0.9": {
+      "cost_frac_curve": 0.0067,
+      "calibrated": {
+       "lambda": 7498.942093324558,
+       "cost_frac": 0.0069,
+       "quality": 0.6376,
+       "quality_vs_ref": 0.9281,
+       "model_share": {
+        "wizardlm-13b": 0.1671,
+        "claude-instant-v1": 0.0024,
+        "codellama-34b": 0.0894,
+        "mistral-7b": 0.6541,
+        "mixtral-8x7b": 0.08,
+        "yi-34b": 0.0071
+       }
+      }
+     },
+     "0.95": {
+      "cost_frac_curve": 0.0072,
+      "calibrated": {
+       "lambda": 6309.573444801943,
+       "cost_frac": 0.0073,
+       "quality": 0.6635,
+       "quality_vs_ref": 0.9658,
+       "model_share": {
+        "wizardlm-13b": 0.1671,
+        "claude-instant-v1": 0.0024,
+        "codellama-34b": 0.0965,
+        "mistral-7b": 0.6282,
+        "mixtral-8x7b": 0.0965,
+        "yi-34b": 0.0094
+       }
+      }
+     },
+     "0.98": {
+      "cost_frac_curve": 0.0076,
+      "calibrated": {
+       "lambda": 6309.573444801943,
+       "cost_frac": 0.0073,
+       "quality": 0.6635,
+       "quality_vs_ref": 0.9658,
+       "model_share": {
+        "wizardlm-13b": 0.1671,
+        "claude-instant-v1": 0.0024,
+        "codellama-34b": 0.0965,
+        "mistral-7b": 0.6282,
+        "mixtral-8x7b": 0.0965,
+        "yi-34b": 0.0094
+       }
+      }
+     },
+     "1.0": {
+      "cost_frac_curve": 0.008,
+      "calibrated": {
+       "lambda": 5956.62143529011,
+       "cost_frac": 0.0076,
+       "quality": 0.68,
+       "quality_vs_ref": 0.9897,
+       "model_share": {
+        "wizardlm-13b": 0.1671,
+        "claude-instant-v1": 0.0024,
+        "gpt-3.5-turbo-1106": 0.0024,
+        "codellama-34b": 0.1012,
+        "mistral-7b": 0.6118,
+        "mixtral-8x7b": 0.1059,
+        "yi-34b": 0.0094
+       }
+      }
+     }
+    },
+    "budgets": {
+     "0.05": {
+      "quality_curve": 0.8635,
+      "quality": 0.8494,
+      "cost_frac": 0.0272
+     },
+     "0.1": {
+      "quality_curve": 0.8659,
+      "quality": 0.8659,
+      "cost_frac": 0.0517
+     },
+     "0.2": {
+      "quality_curve": 0.8659,
+      "quality": 0.8659,
+      "cost_frac": 0.125
+     },
+     "0.5": {
+      "quality_curve": 0.8659,
+      "quality": 0.8659,
+      "cost_frac": 0.125
+     }
+    },
+    "two_model": {
+     "strong": "gpt-4-1106-preview",
+     "weak": "mixtral-8x7b",
+     "apgr": 1.3174,
+     "cpt50": 0.08,
+     "cpt80": 0.12
+    }
+   },
+   "fit_seconds": 0.0
+  },
+  "single-model": {
+   "metrics": {
+    "aiq": 0.6331,
+    "aiq_log": 0.5492,
+    "max_quality": 0.6871,
+    "max_quality_cost_frac": 1.0,
+    "targets": {
+     "0.9": {
+      "cost_frac_curve": 0.8291,
+      "calibrated": {
+       "lambda": 74.98942093324558,
+       "cost_frac": 1.0,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "gpt-4-1106-preview": 1.0
+       }
+      }
+     },
+     "0.95": {
+      "cost_frac_curve": 0.9197,
+      "calibrated": {
+       "lambda": 37.58374042884443,
+       "cost_frac": 1.0,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "gpt-4-1106-preview": 1.0
+       }
+      }
+     },
+     "0.98": {
+      "cost_frac_curve": 0.9724,
+      "calibrated": {
+       "lambda": 33.496543915782794,
+       "cost_frac": 1.0,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "gpt-4-1106-preview": 1.0
+       }
+      }
+     },
+     "1.0": {
+      "cost_frac_curve": 1.0,
+      "calibrated": {
+       "lambda": 19.952623149688808,
+       "cost_frac": 1.0,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "gpt-4-1106-preview": 1.0
+       }
+      }
+     }
+    },
+    "budgets": {
+     "0.05": {
+      "quality_curve": 0.5906,
+      "quality": 0.3859,
+      "cost_frac": 0.0244
+     },
+     "0.1": {
+      "quality_curve": 0.5906,
+      "quality": 0.6847,
+      "cost_frac": 0.9943
+     },
+     "0.2": {
+      "quality_curve": 0.5906,
+      "quality": 0.6871,
+      "cost_frac": 1.0
+     },
+     "0.5": {
+      "quality_curve": 0.5906,
+      "quality": 0.6871,
+      "cost_frac": 1.0
+     }
+    },
+    "ci95": {
+     "cost_frac_at_95pct_quality": [
+      0.8476,
+      0.9619
+     ],
+     "cost_frac_at_parity": [
+      0.9859,
+      1.0
+     ],
+     "quality_minus_ref_at_10pct_cost": [
+      -0.1271,
+      -0.047
+     ]
+    },
+    "two_model": {
+     "strong": "gpt-4-1106-preview",
+     "weak": "mixtral-8x7b",
+     "apgr": 0.5198,
+     "cpt50": 0.42,
+     "cpt80": 0.87,
+     "apgr_ci95": [
+      0.4218,
+      0.6343
+     ]
+    }
+   },
+   "fit_seconds": 0.0
+  },
+  "length-rule": {
+   "metrics": {
+    "aiq": 0.3788,
+    "aiq_log": 0.3788,
+    "max_quality": 0.3788,
+    "max_quality_cost_frac": 0.0138,
+    "targets": {
+     "0.9": {
+      "cost_frac_curve": null,
+      "calibrated": {
+       "lambda": 0.0,
+       "cost_frac": 0.0138,
+       "quality": 0.3788,
+       "quality_vs_ref": 0.5514,
+       "model_share": {
+        "gpt-4-1106-preview": 0.0024,
+        "mistral-7b": 0.8071,
+        "mixtral-8x7b": 0.1906
+       }
+      }
+     },
+     "0.95": {
+      "cost_frac_curve": null,
+      "calibrated": {
+       "lambda": 0.0,
+       "cost_frac": 0.0138,
+       "quality": 0.3788,
+       "quality_vs_ref": 0.5514,
+       "model_share": {
+        "gpt-4-1106-preview": 0.0024,
+        "mistral-7b": 0.8071,
+        "mixtral-8x7b": 0.1906
+       }
+      }
+     },
+     "0.98": {
+      "cost_frac_curve": null,
+      "calibrated": null
+     },
+     "1.0": {
+      "cost_frac_curve": null,
+      "calibrated": null
+     }
+    },
+    "budgets": {
+     "0.05": {
+      "quality_curve": 0.3788
+     },
+     "0.1": {
+      "quality_curve": 0.3788
+     },
+     "0.2": {
+      "quality_curve": 0.3788
+     },
+     "0.5": {
+      "quality_curve": 0.3788
+     }
+    },
+    "two_model": {
+     "strong": "gpt-4-1106-preview",
+     "weak": "mixtral-8x7b",
+     "apgr": 0.5097,
+     "cpt50": 0.36,
+     "cpt80": 0.91
+    }
+   },
+   "fit_seconds": 0.0
+  },
+  "tfidf": {
+   "metrics": {
+    "aiq": 0.6191,
+    "aiq_log": 0.53,
+    "max_quality": 0.6871,
+    "max_quality_cost_frac": 1.0,
+    "targets": {
+     "0.9": {
+      "cost_frac_curve": 0.6295,
+      "calibrated": {
+       "lambda": 112.20184543019641,
+       "cost_frac": 1.0,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "gpt-4-1106-preview": 1.0
+       }
+      }
+     },
+     "0.95": {
+      "cost_frac_curve": 0.8693,
+      "calibrated": {
+       "lambda": 42.169650342858226,
+       "cost_frac": 1.0,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "gpt-4-1106-preview": 1.0
+       }
+      }
+     },
+     "0.98": {
+      "cost_frac_curve": 0.961,
+      "calibrated": {
+       "lambda": 22.3872113856834,
+       "cost_frac": 1.0,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "gpt-4-1106-preview": 1.0
+       }
+      }
+     },
+     "1.0": {
+      "cost_frac_curve": 1.0,
+      "calibrated": {
+       "lambda": 12.589254117941675,
+       "cost_frac": 1.0,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "gpt-4-1106-preview": 1.0
+       }
+      }
+     }
+    },
+    "budgets": {
+     "0.05": {
+      "quality_curve": 0.5624,
+      "quality": 0.5059,
+      "cost_frac": 0.036
+     },
+     "0.1": {
+      "quality_curve": 0.5624,
+      "quality": 0.6847,
+      "cost_frac": 0.9943
+     },
+     "0.2": {
+      "quality_curve": 0.5624,
+      "quality": 0.6871,
+      "cost_frac": 1.0
+     },
+     "0.5": {
+      "quality_curve": 0.5741,
+      "quality": 0.6871,
+      "cost_frac": 1.0
+     }
+    },
+    "ci95": {
+     "cost_frac_at_95pct_quality": [
+      0.6513,
+      0.9318
+     ],
+     "cost_frac_at_parity": [
+      0.9677,
+      1.0
+     ],
+     "quality_minus_ref_at_10pct_cost": [
+      -0.1671,
+      -0.0776
+     ]
+    },
+    "two_model": {
+     "strong": "gpt-4-1106-preview",
+     "weak": "mixtral-8x7b",
+     "apgr": 0.5426,
+     "cpt50": 0.47,
+     "cpt80": 0.69,
+     "apgr_ci95": [
+      0.4485,
+      0.6775
+     ]
+    }
+   },
+   "fit_seconds": 151.4,
+   "config": {},
+   "brier_test": 0.24684
+  },
+  "knn": {
+   "metrics": {
+    "aiq": 0.6342,
+    "aiq_log": 0.544,
+    "max_quality": 0.6871,
+    "max_quality_cost_frac": 1.0,
+    "targets": {
+     "0.9": {
+      "cost_frac_curve": 0.4067,
+      "calibrated": {
+       "lambda": 112.20184543019641,
+       "cost_frac": 0.98,
+       "quality": 0.6824,
+       "quality_vs_ref": 0.9932,
+       "model_share": {
+        "claude-instant-v1": 0.0118,
+        "claude-v2": 0.0024,
+        "gpt-4-1106-preview": 0.9812,
+        "yi-34b": 0.0047
+       }
+      }
+     },
+     "0.95": {
+      "cost_frac_curve": 0.7111,
+      "calibrated": {
+       "lambda": 37.58374042884443,
+       "cost_frac": 0.9987,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "claude-v2": 0.0024,
+        "gpt-4-1106-preview": 0.9976
+       }
+      }
+     },
+     "0.98": {
+      "cost_frac_curve": 0.9289,
+      "calibrated": {
+       "lambda": 23.71373705661655,
+       "cost_frac": 0.9987,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "claude-v2": 0.0024,
+        "gpt-4-1106-preview": 0.9976
+       }
+      }
+     },
+     "1.0": {
+      "cost_frac_curve": 0.9972,
+      "calibrated": {
+       "lambda": 12.589254117941675,
+       "cost_frac": 0.9987,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "claude-v2": 0.0024,
+        "gpt-4-1106-preview": 0.9976
+       }
+      }
+     }
+    },
+    "budgets": {
+     "0.05": {
+      "quality_curve": 0.5929,
+      "quality": 0.5718,
+      "cost_frac": 0.0427
+     },
+     "0.1": {
+      "quality_curve": 0.5929,
+      "quality": 0.6776,
+      "cost_frac": 0.9664
+     },
+     "0.2": {
+      "quality_curve": 0.5929,
+      "quality": 0.6871,
+      "cost_frac": 0.9987
+     },
+     "0.5": {
+      "quality_curve": 0.6306,
+      "quality": 0.6871,
+      "cost_frac": 0.9987
+     }
+    },
+    "ci95": {
+     "cost_frac_at_95pct_quality": [
+      0.3848,
+      0.824
+     ],
+     "cost_frac_at_parity": [
+      0.7384,
+      1.0
+     ],
+     "quality_minus_ref_at_10pct_cost": [
+      -0.1295,
+      -0.0446
+     ]
+    },
+    "two_model": {
+     "strong": "gpt-4-1106-preview",
+     "weak": "mixtral-8x7b",
+     "apgr": 0.5356,
+     "cpt50": 0.43,
+     "cpt80": 0.75,
+     "apgr_ci95": [
+      0.4261,
+      0.6348
+     ]
+    }
+   },
+   "fit_seconds": 3.2,
+   "config": {
+    "k": 128,
+    "alpha": 0.0
+   },
+   "brier_test": 0.2673
+  },
+  "linear": {
+   "metrics": {
+    "aiq": 0.6068,
+    "aiq_log": 0.5244,
+    "max_quality": 0.6659,
+    "max_quality_cost_frac": 0.8581,
+    "targets": {
+     "0.9": {
+      "cost_frac_curve": 0.6596,
+      "calibrated": {
+       "lambda": 100.0,
+       "cost_frac": 0.72,
+       "quality": 0.6259,
+       "quality_vs_ref": 0.911,
+       "model_share": {
+        "wizardlm-13b": 0.04,
+        "claude-instant-v1": 0.0141,
+        "claude-v1": 0.0188,
+        "claude-v2": 0.0847,
+        "gpt-3.5-turbo-1106": 0.0894,
+        "gpt-4-1106-preview": 0.6447,
+        "codellama-34b": 0.0047,
+        "llama-2-70b": 0.0235,
+        "mistral-7b": 0.0024,
+        "yi-34b": 0.0776
+       }
+      }
+     },
+     "0.95": {
+      "cost_frac_curve": 0.7963,
+      "calibrated": {
+       "lambda": 31.622776601683793,
+       "cost_frac": 0.8071,
+       "quality": 0.6541,
+       "quality_vs_ref": 0.9521,
+       "model_share": {
+        "wizardlm-13b": 0.0306,
+        "claude-instant-v1": 0.0094,
+        "claude-v1": 0.0235,
+        "claude-v2": 0.0918,
+        "gpt-3.5-turbo-1106": 0.0494,
+        "gpt-4-1106-preview": 0.7247,
+        "codellama-34b": 0.0047,
+        "llama-2-70b": 0.0165,
+        "yi-34b": 0.0494
+       }
+      }
+     },
+     "0.98": {
+      "cost_frac_curve": null,
+      "calibrated": {
+       "lambda": 21.134890398366476,
+       "cost_frac": 0.8298,
+       "quality": 0.6518,
+       "quality_vs_ref": 0.9486,
+       "model_share": {
+        "wizardlm-13b": 0.0306,
+        "claude-instant-v1": 0.0094,
+        "claude-v1": 0.0235,
+        "claude-v2": 0.0965,
+        "gpt-3.5-turbo-1106": 0.0353,
+        "gpt-4-1106-preview": 0.7459,
+        "codellama-34b": 0.0047,
+        "llama-2-70b": 0.0141,
+        "yi-34b": 0.04
+       }
+      }
+     },
+     "1.0": {
+      "cost_frac_curve": null,
+      "calibrated": {
+       "lambda": 5.011872336272725,
+       "cost_frac": 0.8489,
+       "quality": 0.6635,
+       "quality_vs_ref": 0.9658,
+       "model_share": {
+        "wizardlm-13b": 0.0259,
+        "claude-instant-v1": 0.0047,
+        "claude-v1": 0.0235,
+        "claude-v2": 0.0965,
+        "gpt-3.5-turbo-1106": 0.0259,
+        "gpt-4-1106-preview": 0.7647,
+        "codellama-34b": 0.0047,
+        "llama-2-70b": 0.0165,
+        "yi-34b": 0.0376
+       }
+      }
+     }
+    },
+    "budgets": {
+     "0.05": {
+      "quality_curve": 0.5365,
+      "quality": 0.5271,
+      "cost_frac": 0.0283
+     },
+     "0.1": {
+      "quality_curve": 0.5388,
+      "quality": 0.6141,
+      "cost_frac": 0.6497
+     },
+     "0.2": {
+      "quality_curve": 0.5529,
+      "quality": 0.6447,
+      "cost_frac": 0.7828
+     },
+     "0.5": {
+      "quality_curve": 0.5835,
+      "quality": 0.6518,
+      "cost_frac": 0.8201
+     }
+    },
+    "ci95": {
+     "cost_frac_at_95pct_quality": [
+      0.6779,
+      0.8599
+     ],
+     "cost_frac_at_parity": [
+      0.8195,
+      0.8751
+     ],
+     "quality_minus_ref_at_10pct_cost": [
+      -0.1906,
+      -0.0917
+     ]
+    },
+    "two_model": {
+     "strong": "gpt-4-1106-preview",
+     "weak": "mixtral-8x7b",
+     "apgr": 0.4866,
+     "cpt50": 0.51,
+     "cpt80": 0.81,
+     "apgr_ci95": [
+      0.383,
+      0.5907
+     ]
+    }
+   },
+   "fit_seconds": 4.8,
+   "config": {
+    "hidden": 0,
+    "dropout": 0.2,
+    "best_epoch": 38,
+    "best_val_loss": 0.5427688360214233
+   },
+   "brier_test": 0.27688
+  },
+  "mlp": {
+   "metrics": {
+    "aiq": 0.6136,
+    "aiq_log": 0.5324,
+    "max_quality": 0.6729,
+    "max_quality_cost_frac": 0.916,
+    "targets": {
+     "0.9": {
+      "cost_frac_curve": 0.5758,
+      "calibrated": {
+       "lambda": 125.89254117941675,
+       "cost_frac": 0.7808,
+       "quality": 0.6471,
+       "quality_vs_ref": 0.9418,
+       "model_share": {
+        "wizardlm-13b": 0.0188,
+        "claude-instant-v1": 0.0212,
+        "claude-v2": 0.0071,
+        "gpt-3.5-turbo-1106": 0.0565,
+        "gpt-4-1106-preview": 0.7812,
+        "codellama-34b": 0.0471,
+        "llama-2-70b": 0.0353,
+        "mistral-7b": 0.0094,
+        "yi-34b": 0.0235
+       }
+      }
+     },
+     "0.95": {
+      "cost_frac_curve": 0.807,
+      "calibrated": {
+       "lambda": 37.58374042884443,
+       "cost_frac": 0.8719,
+       "quality": 0.6659,
+       "quality_vs_ref": 0.9692,
+       "model_share": {
+        "wizardlm-13b": 0.0188,
+        "claude-instant-v1": 0.0141,
+        "claude-v2": 0.0094,
+        "gpt-3.5-turbo-1106": 0.0235,
+        "gpt-4-1106-preview": 0.8706,
+        "codellama-34b": 0.0282,
+        "llama-2-70b": 0.0165,
+        "mistral-7b": 0.0071,
+        "yi-34b": 0.0118
+       }
+      }
+     },
+     "0.98": {
+      "cost_frac_curve": null,
+      "calibrated": {
+       "lambda": 23.71373705661655,
+       "cost_frac": 0.8842,
+       "quality": 0.6659,
+       "quality_vs_ref": 0.9692,
+       "model_share": {
+        "wizardlm-13b": 0.0165,
+        "claude-instant-v1": 0.0118,
+        "claude-v2": 0.0094,
+        "gpt-3.5-turbo-1106": 0.0212,
+        "gpt-4-1106-preview": 0.88,
+        "codellama-34b": 0.0282,
+        "llama-2-70b": 0.0141,
+        "mistral-7b": 0.0071,
+        "yi-34b": 0.0118
+       }
+      }
+     },
+     "1.0": {
+      "cost_frac_curve": null,
+      "calibrated": {
+       "lambda": 6.683439175686149,
+       "cost_frac": 0.8959,
+       "quality": 0.6659,
+       "quality_vs_ref": 0.9692,
+       "model_share": {
+        "wizardlm-13b": 0.0165,
+        "claude-instant-v1": 0.0094,
+        "claude-v2": 0.0118,
+        "gpt-3.5-turbo-1106": 0.0212,
+        "gpt-4-1106-preview": 0.8918,
+        "codellama-34b": 0.0235,
+        "llama-2-70b": 0.0118,
+        "mistral-7b": 0.0071,
+        "yi-34b": 0.0071
+       }
+      }
+     }
+    },
+    "budgets": {
+     "0.05": {
+      "quality_curve": 0.5412,
+      "quality": 0.5412,
+      "cost_frac": 0.0307
+     },
+     "0.1": {
+      "quality_curve": 0.5553,
+      "quality": 0.6494,
+      "cost_frac": 0.7565
+     },
+     "0.2": {
+      "quality_curve": 0.5741,
+      "quality": 0.6635,
+      "cost_frac": 0.8554
+     },
+     "0.5": {
+      "quality_curve": 0.6141,
+      "quality": 0.6659,
+      "cost_frac": 0.8794
+     }
+    },
+    "ci95": {
+     "cost_frac_at_95pct_quality": [
+      0.5857,
+      0.898
+     ],
+     "cost_frac_at_parity": [
+      0.8619,
+      0.9224
+     ],
+     "quality_minus_ref_at_10pct_cost": [
+      -0.1765,
+      -0.0846
+     ]
+    },
+    "two_model": {
+     "strong": "gpt-4-1106-preview",
+     "weak": "mixtral-8x7b",
+     "apgr": 0.5037,
+     "cpt50": 0.52,
+     "cpt80": 0.79,
+     "apgr_ci95": [
+      0.3947,
+      0.6215
+     ]
+    }
+   },
+   "fit_seconds": 49.7,
+   "config": {
+    "hidden": 512,
+    "dropout": 0.2,
+    "best_epoch": 50,
+    "best_val_loss": 0.532585859298706
+   },
+   "brier_test": 0.25923
+  },
+  "knn+mlp": {
+   "metrics": {
+    "aiq": 0.6326,
+    "aiq_log": 0.5455,
+    "max_quality": 0.6871,
+    "max_quality_cost_frac": 0.9987,
+    "targets": {
+     "0.9": {
+      "cost_frac_curve": 0.4756,
+      "calibrated": {
+       "lambda": 125.89254117941675,
+       "cost_frac": 0.9817,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "claude-instant-v1": 0.0071,
+        "claude-v2": 0.0047,
+        "gpt-3.5-turbo-1106": 0.0024,
+        "gpt-4-1106-preview": 0.9812,
+        "yi-34b": 0.0047
+       }
+      }
+     },
+     "0.95": {
+      "cost_frac_curve": 0.7442,
+      "calibrated": {
+       "lambda": 39.810717055349734,
+       "cost_frac": 0.9987,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "claude-v2": 0.0024,
+        "gpt-4-1106-preview": 0.9976
+       }
+      }
+     },
+     "0.98": {
+      "cost_frac_curve": 0.8753,
+      "calibrated": {
+       "lambda": 25.11886431509582,
+       "cost_frac": 0.9987,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "claude-v2": 0.0024,
+        "gpt-4-1106-preview": 0.9976
+       }
+      }
+     },
+     "1.0": {
+      "cost_frac_curve": 0.9817,
+      "calibrated": {
+       "lambda": 14.12537544622754,
+       "cost_frac": 0.9987,
+       "quality": 0.6871,
+       "quality_vs_ref": 1.0,
+       "model_share": {
+        "claude-v2": 0.0024,
+        "gpt-4-1106-preview": 0.9976
+       }
+      }
+     }
+    },
+    "budgets": {
+     "0.05": {
+      "quality_curve": 0.5812,
+      "quality": 0.5788,
+      "cost_frac": 0.0372
+     },
+     "0.1": {
+      "quality_curve": 0.5812,
+      "quality": 0.6847,
+      "cost_frac": 0.9729
+     },
+     "0.2": {
+      "quality_curve": 0.5906,
+      "quality": 0.6847,
+      "cost_frac": 0.993
+     },
+     "0.5": {
+      "quality_curve": 0.6259,
+      "quality": 0.6871,
+      "cost_frac": 0.9987
+     }
+    },
+    "ci95": {
+     "cost_frac_at_95pct_quality": [
+      0.4558,
+      0.8675
+     ],
+     "cost_frac_at_parity": [
+      0.8382,
+      1.0
+     ],
+     "quality_minus_ref_at_10pct_cost": [
+      -0.1412,
+      -0.0565
+     ]
+    },
+    "two_model": {
+     "strong": "gpt-4-1106-preview",
+     "weak": "mixtral-8x7b",
+     "apgr": 0.514,
+     "cpt50": 0.47,
+     "cpt80": 0.82,
+     "apgr_ci95": [
+      0.4049,
+      0.6344
+     ]
+    }
+   },
+   "fit_seconds": 44.4,
+   "config": {
+    "members": [
+     {
+      "kind": "knn",
+      "config": {
+       "k": 128,
+       "alpha": 0.0
+      }
+     },
+     {
+      "kind": "mlp",
+      "config": {
+       "hidden": 512,
+       "dropout": 0.2,
+       "best_epoch": 50,
+       "best_val_loss": 0.532585859298706
+      }
+     }
+    ]
+   },
+   "brier_test": 0.2542
+  }
+ }
+}

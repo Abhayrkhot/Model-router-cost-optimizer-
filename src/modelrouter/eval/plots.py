@@ -223,3 +223,47 @@ def pgr_curve(
     fig.tight_layout()
     fig.savefig(out)
     plt.close(fig)
+
+
+def outage_timeline(
+    out: Path,
+    runs: list[tuple[str, dict[str, Any]]],
+    window: tuple[float, float],
+    title: str,
+    mode: str,
+) -> None:
+    """Per-second success rate for load runs that share a fault window (shaded)."""
+    theme = THEMES[mode]
+    plt = _setup(theme)
+    fig, ax = plt.subplots(figsize=(7.2, 3.8), dpi=150)
+    ax.axvspan(window[0], window[1], color=theme["grid"], alpha=0.9, lw=0, zorder=0)
+    ax.annotate(
+        "GPT-4 Turbo returns 503",
+        ((window[0] + window[1]) / 2, 4),
+        ha="center",
+        fontsize=8.5,
+        color=theme["text2"],
+    )
+    for (label, run), color in zip(runs, theme["series"], strict=False):
+        tl = run["timeline"]
+        t = np.array([b["t"] for b in tl], dtype=float) + 0.5
+        ok = np.array([100.0 * b["ok"] / max(1, b["sent"]) for b in tl])
+        ax.plot(t, ok, color=color, lw=2.0, label=label)
+        k = int(np.argmin(np.abs(t - (window[0] + window[1]) / 2)))
+        ax.annotate(
+            f"{label}: {ok[k]:.0f}%",
+            (t[k], ok[k]),
+            xytext=(6, -12 if ok[k] > 50 else 6),
+            textcoords="offset points",
+            fontsize=8.5,
+            color=theme["text"],
+        )
+    ax.set_ylim(0, 105)
+    ax.set_xlim(0, max(b["t"] for _, r in runs for b in r["timeline"]) + 1)
+    ax.set_xlabel("Seconds into the run")
+    ax.set_ylabel("Requests answered (%)")
+    ax.set_title(title, loc="left", fontsize=11, pad=10)
+    ax.legend(loc="lower left", fontsize=8.5)
+    fig.tight_layout()
+    fig.savefig(out)
+    plt.close(fig)
