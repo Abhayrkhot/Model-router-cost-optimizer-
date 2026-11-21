@@ -129,9 +129,30 @@ Train on every other benchmark, test on the held-out one. Single seed. This is t
 | mmlu | 14,037 | 0.640 | 0.648 | 0.658 | 0.662 | 61.1% | 57.3% | 0.582 |
 | winogrande | 1,267 | 0.627 | 0.646 | 0.590 | 0.635 | 85.6% | 83.0% | 0.543 |
 
+## Router decision cost
+
+Time to embed (if needed), predict quality and cost, and rank, one prompt at a time (`bench/router_latency.py`, test prompts, outside the gateway). Measured on the dev box (Intel i7-12700H, shared; 1-minute load average in the last column).
+
+| Router | Threads | p50 ms | p90 ms | p99 ms | Artifact MB | Host loadavg |
+|---|---:|---:|---:|---:|---:|---:|
+| kNN + MLP | 1 | 45.127 | 130.770 | 133.749 | 36.2 | 4.0 |
+| kNN + MLP | 4 | 17.165 | 40.184 | 51.755 | 36.2 | 4.4 |
+| TF-IDF ridge | 1 | 0.058 | 0.110 | 0.174 | 2.4 | 4.4 |
+
+## Gateway end to end (replay)
+
+Every test prompt sent through the running gateway (HTTP, online routing, replay upstreams), compared with the same router's offline decisions at the same λ. Run on a GitHub Actions runner (`bench` workflow).
+
+| Router | λ | Requests | OK | Decisions identical | Quality gateway / offline | Cost per 1k gateway / offline |
+|---|---:|---:|---:|---:|---:|---:|
+| knn-mlp | 300 | 7,294 | 7,294 | 100.00% | 0.7233 / 0.7233 | $0.2201 / $0.2201 |
+| knn-mlp | 31.6 | 7,294 | 7,294 | 100.00% | 0.8000 / 0.8000 | $1.1401 / $1.1401 |
+| tfidf | 300 | 7,294 | 7,294 | 100.00% | 0.7188 / 0.7188 | $0.2239 / $0.2239 |
+| tfidf | 31.6 | 7,294 | 7,294 | 100.00% | 0.8069 / 0.8069 | $1.4268 / $1.4268 |
+
 ## Where the traffic goes (λ = 31.6, random-s0 test)
 
-Overall quality 0.800 at $1.137 per 1k prompts.
+kNN + MLP router. Overall quality 0.800 at $1.137 per 1k prompts.
 
 | Benchmark | Prompts | Quality | GPT-4 Turbo quality | Cost vs GPT-4 Turbo | Top models |
 |---|---:|---:|---:|---:|---|
@@ -143,3 +164,17 @@ Overall quality 0.800 at $1.137 per 1k prompts.
 | mmlu | 2,807 | 0.793 | 0.815 | 68% | gpt-4-1106-preview 80%, yi-34b 7%, mixtral-8x7b 7% |
 | mtbench | 16 | 0.738 | 0.762 | 83% | gpt-4-1106-preview 81%, gpt-3.5-turbo-1106 12%, yi-34b 6% |
 | winogrande | 253 | 0.826 | 0.826 | 100% | gpt-4-1106-preview 100% |
+
+## Gateway load tests
+
+TF-IDF router, one gateway process on a 4-vCPU GitHub Actions runner with the load generator on the same machine; replay upstreams answer instantly, so latency is the gateway's own. Open-loop Poisson arrivals; latency is measured from each request's scheduled send time. Outage runs: GPT-4 returns 503 from 20 s to 40 s at λ = 31.6 (where it gets about half the traffic).
+
+| Run | Target rps | Achieved | Success | p50 ms | p99 ms | Router p50 / p99 ms | Fallback-served | loadavg |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| outage-breaker-only | 100 | 100 | 99.85% | 2.4 | 4.0 | 0.3 / 0.6 | 1,044 | 0.6 |
+| outage-full | 100 | 100 | 100.00% | 2.4 | 4.1 | 0.3 / 0.6 | 1,054 | 0.6 |
+| outage-none | 100 | 100 | 82.55% | 2.6 | 49.8 | 0.3 / 0.6 | 0 | 0.2 |
+| rate-100 | 100 | 102 | 100.00% | 2.5 | 4.7 | 0.3 / 0.6 | 0 | 1.1 |
+| rate-200 | 200 | 201 | 100.00% | 2.5 | 5.1 | 0.2 / 0.6 | 0 | 1.0 |
+| rate-400 | 400 | 400 | 100.00% | 2.6 | 7.6 | 0.2 / 0.5 | 0 | 1.1 |
+| rate-800 (saturated) | 800 | 656 | 100.00% | 5289.4 | 9806.3 | 0.2 / 0.5 | 0 | 1.5 |

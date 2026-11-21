@@ -1,0 +1,9 @@
+{
+ "requests": 7294,
+ "ok": 7294,
+ "decision_agreement": 1.0,
+ "gateway_quality": 0.71883,
+ "offline_quality": 0.71883,
+ "gateway_cost_per_1k_usd": 0.22386,
+ "offline_cost_per_1k_usd": 0.22386
+}

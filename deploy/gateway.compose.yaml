@@ -1,6 +1,7 @@
 # Compose variant of gateway.replay.yaml: same router and replay deployments, container paths,
 # Redis for limits and cache (MODELROUTER_REDIS_URL).
-router_dir: /models/routers/knn-mlp-random-s0
+# TF-IDF: 0.06 ms decisions, no embedding model; for kNN + MLP use knn-mlp-random-s0.
+router_dir: /models/routers/tfidf-random-s0
 replay_fixture: /models/replay/random-s0-test.jsonl.gz
 decision_log: /tmp/decisions.jsonl
 cache_ttl_s: 0

@@ -227,32 +227,56 @@ def build(results: Path, dataset_manifest: Path) -> tuple[str, dict[str, Any]]:
             )
         summary["lofo"] = table_lofo
 
+    # --- router cost ----------------------------------------------------------------------
+    lat = sorted((results / "latency").glob("*.json")) if (results / "latency").exists() else []
+    if lat:
+        lines += ["", "## Router decision cost", ""]
+        lines += [
+            "Time to embed (if needed), predict quality and cost, and rank, one prompt at a time "
+            "(`bench/router_latency.py`, test prompts, outside the gateway). Measured on the dev "
+            "box (Intel i7-12700H, shared; 1-minute load average in the last column).",
+            "",
+            "| Router | Threads | p50 ms | p90 ms | p99 ms | Artifact MB | Host loadavg |",
+            "|---|---:|---:|---:|---:|---:|---:|",
+        ]
+        rows_lat = []
+        for p in lat:
+            d = json.loads(p.read_text())
+            rows_lat.append(d)
+            name = "kNN + MLP" if d["router"] == "ensemble" else LABEL.get(d["router"], d["router"])
+            lines.append(
+                f"| {name} | {d['threads']} | {d['p50_ms']:.3f} | {d['p90_ms']:.3f} | "
+                f"{d['p99_ms']:.3f} | {d['artifact_mb']} | {d['loadavg_1m']} |"
+            )
+        summary["router_latency"] = rows_lat
+
     # --- gateway --------------------------------------------------------------------------
     e2e = sorted((results / "e2e").glob("compare-*.json")) if (results / "e2e").exists() else []
     if e2e:
         lines += ["", "## Gateway end to end (replay)", ""]
         lines += [
-            "Every test prompt sent through the running gateway (HTTP, micro-batched online "
-            "embedding, routing, replay upstreams), compared with the offline policy at the "
-            "same λ.",
+            "Every test prompt sent through the running gateway (HTTP, online routing, replay "
+            "upstreams), compared with the same router's offline decisions at the same λ. Run on "
+            "a GitHub Actions runner (`bench` workflow).",
             "",
-            "| λ | Requests | OK | Decisions identical | Quality gateway / offline | "
+            "| Router | λ | Requests | OK | Decisions identical | Quality gateway / offline | "
             "Cost per 1k gateway / offline |",
-            "|---:|---:|---:|---:|---:|---:|",
+            "|---|---:|---:|---:|---:|---:|---:|",
         ]
         for p in e2e:
             c = json.loads(p.read_text())
-            lam = p.stem.removeprefix("compare-lam")
+            router, _, lam = p.stem.removeprefix("compare-").rpartition("-lam")
             lines.append(
-                f"| {lam} | {c['requests']:,} | {c['ok']:,} | {100 * c['decision_agreement']:.2f}% "
+                f"| {router} | {lam} | {c['requests']:,} | {c['ok']:,} | "
+                f"{100 * c['decision_agreement']:.2f}% "
                 f"| {c['gateway_quality']:.4f} / {c['offline_quality']:.4f} "
                 f"| ${c['gateway_cost_per_1k_usd']:.4f} / ${c['offline_cost_per_1k_usd']:.4f} |"
             )
-        summary["e2e"] = [json.loads(p.read_text()) for p in e2e]
+        summary["e2e"] = {p.stem: json.loads(p.read_text()) for p in e2e}
 
     fam_files = (
-        sorted((results / "e2e").glob("offline-lam*.json"))
-        if e2e or (results / "e2e").exists()
+        sorted((results / "e2e").glob("offline-knn-mlp-lam*.json"))
+        if (results / "e2e").exists()
         else []
     )
     for p in fam_files:
@@ -261,8 +285,8 @@ def build(results: Path, dataset_manifest: Path) -> tuple[str, dict[str, Any]]:
             continue
         lines += ["", f"## Where the traffic goes (λ = {off['lambda']:g}, {s0['split']} test)", ""]
         lines += [
-            f"Overall quality {off['quality']:.3f} at ${off['cost_per_1k_usd']:.3f} "
-            "per 1k prompts.",
+            f"kNN + MLP router. Overall quality {off['quality']:.3f} at "
+            f"${off['cost_per_1k_usd']:.3f} per 1k prompts.",
             "",
             f"| Benchmark | Prompts | Quality | {REF} quality | Cost vs {REF} | Top models |",
             "|---|---:|---:|---:|---:|---|",
@@ -279,8 +303,11 @@ def build(results: Path, dataset_manifest: Path) -> tuple[str, dict[str, Any]]:
     if load:
         lines += ["", "## Gateway load tests", ""]
         lines += [
-            "Open-loop arrivals; latency measured from each request's scheduled send time. "
-            "`loadavg` is the host's 1-minute load at the end of the run (the host is shared).",
+            "TF-IDF router, one gateway process on a 4-vCPU GitHub Actions runner with the load "
+            "generator on the same machine; replay upstreams answer instantly, so latency is the "
+            "gateway's own. Open-loop Poisson arrivals; latency is measured from each request's "
+            "scheduled send time. Outage runs: GPT-4 returns 503 from 20 s to 40 s at λ = 31.6 "
+            "(where it gets about half the traffic).",
             "",
             "| Run | Target rps | Achieved | Success | p50 ms | p99 ms | Router p50 / p99 ms | "
             "Fallback-served | loadavg |",
@@ -291,8 +318,10 @@ def build(results: Path, dataset_manifest: Path) -> tuple[str, dict[str, Any]]:
             d = json.loads(p.read_text())
             runs.append({"name": p.stem, **{k: v for k, v in d.items() if k != "timeline"}})
             lat, rms = d["latency_ms"], d["router_ms"]
+            saturated = d["achieved_rps"] < 0.95 * d["config"]["rate"]
             lines.append(
-                f"| {p.stem} | {d['config']['rate']:.0f} | {d['achieved_rps']:.0f} | "
+                f"| {p.stem}{' (saturated)' if saturated else ''} | {d['config']['rate']:.0f} | "
+                f"{d['achieved_rps']:.0f} | "
                 f"{100 * d['success_rate']:.2f}% | {lat['p50']:.1f} | {lat['p99']:.1f} | "
                 f"{rms['p50']:.1f} / {rms['p99']:.1f} | {d['fallback_served']:,} | "
                 f"{d['loadavg_1m_end']:.1f} |"

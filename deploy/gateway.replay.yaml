@@ -1,7 +1,8 @@
 # Gateway over RouterBench replay: every deployment answers with the response that model really
 # gave to the prompt (recorded in the fixture), so end-to-end quality and cost can be checked
 # against the offline evaluation.  Latencies are rough per-model figures for load tests.
-router_dir: ../artifacts/routers/knn-mlp-random-s0
+# TF-IDF: 0.06 ms decisions, no embedding model; for kNN + MLP use knn-mlp-random-s0.
+router_dir: ../artifacts/routers/tfidf-random-s0
 replay_fixture: ../artifacts/replay/random-s0-test.jsonl.gz
 decision_log: ../artifacts/logs/decisions.jsonl
 cache_ttl_s: 0

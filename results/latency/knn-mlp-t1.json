@@ -1,0 +1,1 @@
+{"router": "ensemble", "artifact_mb": 36.2, "threads": 1, "n": 300, "p50_ms": 45.127, "p90_ms": 130.77, "p99_ms": 133.749, "mean_ms": 58.734, "loadavg_1m": 4.0}

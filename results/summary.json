@@ -481,6 +481,79 @@
    "apgr": 0.543
   }
  },
+ "router_latency": [
+  {
+   "router": "ensemble",
+   "artifact_mb": 36.2,
+   "threads": 1,
+   "n": 300,
+   "p50_ms": 45.127,
+   "p90_ms": 130.77,
+   "p99_ms": 133.749,
+   "mean_ms": 58.734,
+   "loadavg_1m": 4.0
+  },
+  {
+   "router": "ensemble",
+   "artifact_mb": 36.2,
+   "threads": 4,
+   "n": 300,
+   "p50_ms": 17.165,
+   "p90_ms": 40.184,
+   "p99_ms": 51.755,
+   "mean_ms": 21.244,
+   "loadavg_1m": 4.4
+  },
+  {
+   "router": "tfidf",
+   "artifact_mb": 2.4,
+   "threads": 1,
+   "n": 1000,
+   "p50_ms": 0.058,
+   "p90_ms": 0.11,
+   "p99_ms": 0.174,
+   "mean_ms": 0.065,
+   "loadavg_1m": 4.4
+  }
+ ],
+ "e2e": {
+  "compare-knn-mlp-lam300": {
+   "requests": 7294,
+   "ok": 7294,
+   "decision_agreement": 1.0,
+   "gateway_quality": 0.72327,
+   "offline_quality": 0.72327,
+   "gateway_cost_per_1k_usd": 0.22008,
+   "offline_cost_per_1k_usd": 0.22008
+  },
+  "compare-knn-mlp-lam31.6": {
+   "requests": 7294,
+   "ok": 7294,
+   "decision_agreement": 1.0,
+   "gateway_quality": 0.79998,
+   "offline_quality": 0.79998,
+   "gateway_cost_per_1k_usd": 1.14007,
+   "offline_cost_per_1k_usd": 1.14007
+  },
+  "compare-tfidf-lam300": {
+   "requests": 7294,
+   "ok": 7294,
+   "decision_agreement": 1.0,
+   "gateway_quality": 0.71883,
+   "offline_quality": 0.71883,
+   "gateway_cost_per_1k_usd": 0.22386,
+   "offline_cost_per_1k_usd": 0.22386
+  },
+  "compare-tfidf-lam31.6": {
+   "requests": 7294,
+   "ok": 7294,
+   "decision_agreement": 1.0,
+   "gateway_quality": 0.80691,
+   "offline_quality": 0.80691,
+   "gateway_cost_per_1k_usd": 1.42678,
+   "offline_cost_per_1k_usd": 1.42678
+  }
+ },
  "by_family": {
   "31.6": {
    "arc": {
@@ -570,5 +643,399 @@
     }
    }
   }
- }
+ },
+ "load": [
+  {
+   "name": "outage-breaker-only",
+   "config": {
+    "url": "http://127.0.0.1:18080",
+    "fixture": "artifacts/replay/random-s0-test.jsonl.gz",
+    "rate": 100.0,
+    "duration": 60.0,
+    "poisson": false,
+    "lam": 31.6,
+    "connections": 512,
+    "timeout": 30.0,
+    "seed": 0,
+    "fault": [
+     {
+      "deployment": "gpt-4-1106-preview",
+      "rate": 1.0,
+      "start": 20.0,
+      "end": 40.0
+     }
+    ],
+    "limit": 0,
+    "concurrency": 0,
+    "out": "results/load/outage-breaker-only.json",
+    "dump": null
+   },
+   "requests": 6000,
+   "wall_s": 60.01,
+   "achieved_rps": 100.0,
+   "ok": 5991,
+   "success_rate": 0.9985,
+   "errors": {
+    "upstream_unavailable": 9
+   },
+   "latency_ms": {
+    "p50": 2.41,
+    "p90": 3.65,
+    "p99": 4.04,
+    "p999": 19.01,
+    "max": 46.36,
+    "mean_ok": 2.54
+   },
+   "router_ms": {
+    "p50": 0.252,
+    "p99": 0.558
+   },
+   "quality": 0.7792,
+   "cost_per_1k_usd": 1.1704,
+   "fallback_served": 1044,
+   "model_share": {
+    "gpt-4-1106-preview": 0.3654,
+    "yi-34b": 0.2475,
+    "gpt-3.5-turbo-1106": 0.1945,
+    "claude-instant-v1": 0.0785,
+    "mixtral-8x7b": 0.0474,
+    "claude-v2": 0.0416,
+    "claude-v1": 0.0239,
+    "llama-2-70b": 0.0007,
+    "wizardlm-13b": 0.0003,
+    "mistral-7b": 0.0003
+   },
+   "loadavg_1m_end": 0.56201171875
+  },
+  {
+   "name": "outage-full",
+   "config": {
+    "url": "http://127.0.0.1:18080",
+    "fixture": "artifacts/replay/random-s0-test.jsonl.gz",
+    "rate": 100.0,
+    "duration": 60.0,
+    "poisson": false,
+    "lam": 31.6,
+    "connections": 512,
+    "timeout": 30.0,
+    "seed": 0,
+    "fault": [
+     {
+      "deployment": "gpt-4-1106-preview",
+      "rate": 1.0,
+      "start": 20.0,
+      "end": 40.0
+     }
+    ],
+    "limit": 0,
+    "concurrency": 0,
+    "out": "results/load/outage-full.json",
+    "dump": null
+   },
+   "requests": 6000,
+   "wall_s": 60.01,
+   "achieved_rps": 100.0,
+   "ok": 6000,
+   "success_rate": 1.0,
+   "errors": {},
+   "latency_ms": {
+    "p50": 2.39,
+    "p90": 3.58,
+    "p99": 4.07,
+    "p999": 25.97,
+    "max": 46.36,
+    "mean_ok": 2.56
+   },
+   "router_ms": {
+    "p50": 0.253,
+    "p99": 0.569
+   },
+   "quality": 0.7788,
+   "cost_per_1k_usd": 1.1704,
+   "fallback_served": 1054,
+   "model_share": {
+    "gpt-4-1106-preview": 0.3647,
+    "yi-34b": 0.2475,
+    "gpt-3.5-turbo-1106": 0.1947,
+    "claude-instant-v1": 0.0787,
+    "mixtral-8x7b": 0.0477,
+    "claude-v2": 0.0417,
+    "claude-v1": 0.0238,
+    "llama-2-70b": 0.0007,
+    "wizardlm-13b": 0.0003,
+    "mistral-7b": 0.0003
+   },
+   "loadavg_1m_end": 0.63037109375
+  },
+  {
+   "name": "outage-none",
+   "config": {
+    "url": "http://127.0.0.1:18080",
+    "fixture": "artifacts/replay/random-s0-test.jsonl.gz",
+    "rate": 100.0,
+    "duration": 60.0,
+    "poisson": false,
+    "lam": 31.6,
+    "connections": 512,
+    "timeout": 30.0,
+    "seed": 0,
+    "fault": [
+     {
+      "deployment": "gpt-4-1106-preview",
+      "rate": 1.0,
+      "start": 20.0,
+      "end": 40.0
+     }
+    ],
+    "limit": 0,
+    "concurrency": 0,
+    "out": "results/load/outage-none.json",
+    "dump": null
+   },
+   "requests": 6000,
+   "wall_s": 60.01,
+   "achieved_rps": 100.0,
+   "ok": 4953,
+   "success_rate": 0.8255,
+   "errors": {
+    "upstream_unavailable": 1047
+   },
+   "latency_ms": {
+    "p50": 2.57,
+    "p90": 23.42,
+    "p99": 49.75,
+    "p999": 52.83,
+    "max": 54.0,
+    "mean_ok": 2.58
+   },
+   "router_ms": {
+    "p50": 0.26,
+    "p99": 0.575
+   },
+   "quality": 0.8041,
+   "cost_per_1k_usd": 1.3462,
+   "fallback_served": 0,
+   "model_share": {
+    "gpt-4-1106-preview": 0.4432,
+    "yi-34b": 0.2346,
+    "gpt-3.5-turbo-1106": 0.1536,
+    "claude-instant-v1": 0.0789,
+    "claude-v2": 0.0388,
+    "mixtral-8x7b": 0.0347,
+    "claude-v1": 0.0147,
+    "llama-2-70b": 0.0006,
+    "wizardlm-13b": 0.0004,
+    "mistral-7b": 0.0004
+   },
+   "loadavg_1m_end": 0.18798828125
+  },
+  {
+   "name": "rate-100",
+   "config": {
+    "url": "http://127.0.0.1:18080",
+    "fixture": "artifacts/replay/random-s0-test.jsonl.gz",
+    "rate": 100.0,
+    "duration": 45.0,
+    "poisson": true,
+    "lam": 300.0,
+    "connections": 512,
+    "timeout": 30.0,
+    "seed": 0,
+    "fault": [],
+    "limit": 0,
+    "concurrency": 0,
+    "out": "results/load/rate-100.json",
+    "dump": null
+   },
+   "requests": 4500,
+   "wall_s": 43.89,
+   "achieved_rps": 102.5,
+   "ok": 4500,
+   "success_rate": 1.0,
+   "errors": {},
+   "latency_ms": {
+    "p50": 2.54,
+    "p90": 3.47,
+    "p99": 4.66,
+    "p999": 20.61,
+    "max": 25.35,
+    "mean_ok": 2.68
+   },
+   "router_ms": {
+    "p50": 0.256,
+    "p99": 0.586
+   },
+   "quality": 0.7114,
+   "cost_per_1k_usd": 0.2234,
+   "fallback_served": 0,
+   "model_share": {
+    "yi-34b": 0.4013,
+    "gpt-3.5-turbo-1106": 0.3171,
+    "mixtral-8x7b": 0.1493,
+    "claude-instant-v1": 0.1262,
+    "gpt-4-1106-preview": 0.002,
+    "mistral-7b": 0.0018,
+    "wizardlm-13b": 0.0013,
+    "llama-2-70b": 0.0007,
+    "codellama-34b": 0.0002
+   },
+   "loadavg_1m_end": 1.09423828125
+  },
+  {
+   "name": "rate-200",
+   "config": {
+    "url": "http://127.0.0.1:18080",
+    "fixture": "artifacts/replay/random-s0-test.jsonl.gz",
+    "rate": 200.0,
+    "duration": 45.0,
+    "poisson": true,
+    "lam": 300.0,
+    "connections": 512,
+    "timeout": 30.0,
+    "seed": 0,
+    "fault": [],
+    "limit": 0,
+    "concurrency": 0,
+    "out": "results/load/rate-200.json",
+    "dump": null
+   },
+   "requests": 9000,
+   "wall_s": 44.69,
+   "achieved_rps": 201.4,
+   "ok": 9000,
+   "success_rate": 1.0,
+   "errors": {},
+   "latency_ms": {
+    "p50": 2.51,
+    "p90": 3.53,
+    "p99": 5.1,
+    "p999": 23.67,
+    "max": 38.6,
+    "mean_ok": 2.69
+   },
+   "router_ms": {
+    "p50": 0.246,
+    "p99": 0.567
+   },
+   "quality": 0.7161,
+   "cost_per_1k_usd": 0.2233,
+   "fallback_served": 0,
+   "model_share": {
+    "yi-34b": 0.4039,
+    "gpt-3.5-turbo-1106": 0.3149,
+    "mixtral-8x7b": 0.1488,
+    "claude-instant-v1": 0.1259,
+    "mistral-7b": 0.0021,
+    "gpt-4-1106-preview": 0.0021,
+    "wizardlm-13b": 0.0016,
+    "llama-2-70b": 0.0007,
+    "codellama-34b": 0.0001
+   },
+   "loadavg_1m_end": 0.9892578125
+  },
+  {
+   "name": "rate-400",
+   "config": {
+    "url": "http://127.0.0.1:18080",
+    "fixture": "artifacts/replay/random-s0-test.jsonl.gz",
+    "rate": 400.0,
+    "duration": 45.0,
+    "poisson": true,
+    "lam": 300.0,
+    "connections": 512,
+    "timeout": 30.0,
+    "seed": 0,
+    "fault": [],
+    "limit": 0,
+    "concurrency": 0,
+    "out": "results/load/rate-400.json",
+    "dump": null
+   },
+   "requests": 18000,
+   "wall_s": 45.03,
+   "achieved_rps": 399.7,
+   "ok": 18000,
+   "success_rate": 1.0,
+   "errors": {},
+   "latency_ms": {
+    "p50": 2.61,
+    "p90": 4.14,
+    "p99": 7.6,
+    "p999": 36.39,
+    "max": 83.43,
+    "mean_ok": 2.99
+   },
+   "router_ms": {
+    "p50": 0.235,
+    "p99": 0.528
+   },
+   "quality": 0.7187,
+   "cost_per_1k_usd": 0.2234,
+   "fallback_served": 0,
+   "model_share": {
+    "yi-34b": 0.4043,
+    "gpt-3.5-turbo-1106": 0.3147,
+    "mixtral-8x7b": 0.1472,
+    "claude-instant-v1": 0.1275,
+    "gpt-4-1106-preview": 0.0021,
+    "mistral-7b": 0.0019,
+    "wizardlm-13b": 0.0015,
+    "llama-2-70b": 0.0007,
+    "codellama-34b": 0.0001
+   },
+   "loadavg_1m_end": 1.076171875
+  },
+  {
+   "name": "rate-800",
+   "config": {
+    "url": "http://127.0.0.1:18080",
+    "fixture": "artifacts/replay/random-s0-test.jsonl.gz",
+    "rate": 800.0,
+    "duration": 45.0,
+    "poisson": true,
+    "lam": 300.0,
+    "connections": 512,
+    "timeout": 30.0,
+    "seed": 0,
+    "fault": [],
+    "limit": 0,
+    "concurrency": 0,
+    "out": "results/load/rate-800.json",
+    "dump": null
+   },
+   "requests": 36000,
+   "wall_s": 54.83,
+   "achieved_rps": 656.5,
+   "ok": 36000,
+   "success_rate": 1.0,
+   "errors": {},
+   "latency_ms": {
+    "p50": 5289.38,
+    "p90": 8914.6,
+    "p99": 9806.33,
+    "p999": 9976.66,
+    "max": 10087.04,
+    "mean_ok": 5199.77
+   },
+   "router_ms": {
+    "p50": 0.228,
+    "p99": 0.508
+   },
+   "quality": 0.7188,
+   "cost_per_1k_usd": 0.2238,
+   "fallback_served": 0,
+   "model_share": {
+    "yi-34b": 0.4057,
+    "gpt-3.5-turbo-1106": 0.3129,
+    "mixtral-8x7b": 0.147,
+    "claude-instant-v1": 0.1283,
+    "gpt-4-1106-preview": 0.0021,
+    "mistral-7b": 0.0018,
+    "wizardlm-13b": 0.0015,
+    "llama-2-70b": 0.0007,
+    "codellama-34b": 0.0001
+   },
+   "loadavg_1m_end": 1.4638671875
+  }
+ ]
 }

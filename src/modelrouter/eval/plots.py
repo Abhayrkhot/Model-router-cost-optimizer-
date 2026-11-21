@@ -232,10 +232,12 @@ def outage_timeline(
     title: str,
     mode: str,
 ) -> None:
-    """Per-second success rate for load runs that share a fault window (shaded)."""
+    """Per-second share of requests answered for load runs sharing a fault window (shaded).
+
+    Each line is labelled once with its success rate over the whole fault window."""
     theme = THEMES[mode]
     plt = _setup(theme)
-    fig, ax = plt.subplots(figsize=(7.2, 3.8), dpi=150)
+    fig, ax = plt.subplots(figsize=(7.2, 3.9), dpi=150)
     ax.axvspan(window[0], window[1], color=theme["grid"], alpha=0.9, lw=0, zorder=0)
     ax.annotate(
         "GPT-4 Turbo returns 503",
@@ -244,21 +246,31 @@ def outage_timeline(
         fontsize=8.5,
         color=theme["text2"],
     )
-    for (label, run), color in zip(runs, theme["series"], strict=False):
+    mid = (window[0] + window[1]) / 2
+    # label anchors: (x, y offset in points, vertical alignment) per series
+    anchors = [(mid, 8, "bottom"), (window[0] + 2.5, -9, "top"), (mid, -14, "top")]
+    for i, ((label, run), color) in enumerate(zip(runs, theme["series"], strict=False)):
         tl = run["timeline"]
         t = np.array([b["t"] for b in tl], dtype=float) + 0.5
         ok = np.array([100.0 * b["ok"] / max(1, b["sent"]) for b in tl])
-        ax.plot(t, ok, color=color, lw=2.0, label=label)
-        k = int(np.argmin(np.abs(t - (window[0] + window[1]) / 2)))
+        ax.plot(t, ok, color=color, lw=2.0, label=label, zorder=3 - i * 0.1)
+        inside = [b for b in tl if window[0] <= b["t"] < window[1]]
+        share = 100.0 * sum(b["ok"] for b in inside) / max(1, sum(b["sent"] for b in inside))
+        x, dy, va = anchors[min(i, len(anchors) - 1)]
+        y = float(np.interp(x, t, ok)) if i != 0 else 100.0
+        text = f"{label}: {share:.1f}% answered" if share < 99.95 else f"{label}: 100% answered"
         ax.annotate(
-            f"{label}: {ok[k]:.0f}%",
-            (t[k], ok[k]),
-            xytext=(6, -12 if ok[k] > 50 else 6),
+            text,
+            (x, y),
+            xytext=(0 if i != 1 else 4, dy),
             textcoords="offset points",
             fontsize=8.5,
             color=theme["text"],
+            ha="center" if i != 1 else "left",
+            va=va,
         )
-    ax.set_ylim(0, 105)
+    ax.set_ylim(0, 112)
+    ax.set_yticks([0, 20, 40, 60, 80, 100])
     ax.set_xlim(0, max(b["t"] for _, r in runs for b in r["timeline"]) + 1)
     ax.set_xlabel("Seconds into the run")
     ax.set_ylabel("Requests answered (%)")

@@ -1,0 +1,739 @@
+{
+ "config": {
+  "url": "http://127.0.0.1:18080",
+  "fixture": "artifacts/replay/random-s0-test.jsonl.gz",
+  "rate": 400.0,
+  "duration": 45.0,
+  "poisson": true,
+  "lam": 300.0,
+  "connections": 512,
+  "timeout": 30.0,
+  "seed": 0,
+  "fault": [],
+  "limit": 0,
+  "concurrency": 0,
+  "out": "results/load/rate-400.json",
+  "dump": null
+ },
+ "requests": 18000,
+ "wall_s": 45.03,
+ "achieved_rps": 399.7,
+ "ok": 18000,
+ "success_rate": 1.0,
+ "errors": {},
+ "latency_ms": {
+  "p50": 2.61,
+  "p90": 4.14,
+  "p99": 7.6,
+  "p999": 36.39,
+  "max": 83.43,
+  "mean_ok": 2.99
+ },
+ "router_ms": {
+  "p50": 0.235,
+  "p99": 0.528
+ },
+ "quality": 0.7187,
+ "cost_per_1k_usd": 0.2234,
+ "fallback_served": 0,
+ "model_share": {
+  "yi-34b": 0.4043,
+  "gpt-3.5-turbo-1106": 0.3147,
+  "mixtral-8x7b": 0.1472,
+  "claude-instant-v1": 0.1275,
+  "gpt-4-1106-preview": 0.0021,
+  "mistral-7b": 0.0019,
+  "wizardlm-13b": 0.0015,
+  "llama-2-70b": 0.0007,
+  "codellama-34b": 0.0001
+ },
+ "timeline": [
+  {
+   "t": 0,
+   "sent": 407,
+   "ok": 407,
+   "errors": 0,
+   "p99_ms": 7.3,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 139,
+    "yi-34b": 177,
+    "mixtral-8x7b": 54,
+    "claude-instant-v1": 35,
+    "mistral-7b": 1,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 1,
+   "sent": 414,
+   "ok": 414,
+   "errors": 0,
+   "p99_ms": 23.1,
+   "by_deployment": {
+    "yi-34b": 151,
+    "gpt-3.5-turbo-1106": 129,
+    "mixtral-8x7b": 79,
+    "mistral-7b": 3,
+    "claude-instant-v1": 51,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 2,
+   "sent": 413,
+   "ok": 413,
+   "errors": 0,
+   "p99_ms": 7.4,
+   "by_deployment": {
+    "yi-34b": 171,
+    "claude-instant-v1": 49,
+    "gpt-3.5-turbo-1106": 128,
+    "mixtral-8x7b": 61,
+    "gpt-4-1106-preview": 2,
+    "llama-2-70b": 1,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 3,
+   "sent": 417,
+   "ok": 417,
+   "errors": 0,
+   "p99_ms": 6.3,
+   "by_deployment": {
+    "mixtral-8x7b": 68,
+    "gpt-3.5-turbo-1106": 127,
+    "yi-34b": 162,
+    "claude-instant-v1": 56,
+    "wizardlm-13b": 1,
+    "gpt-4-1106-preview": 2,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 4,
+   "sent": 383,
+   "ok": 383,
+   "errors": 0,
+   "p99_ms": 5.7,
+   "by_deployment": {
+    "claude-instant-v1": 53,
+    "gpt-3.5-turbo-1106": 132,
+    "yi-34b": 149,
+    "mixtral-8x7b": 48,
+    "gpt-4-1106-preview": 1
+   }
+  },
+  {
+   "t": 5,
+   "sent": 395,
+   "ok": 395,
+   "errors": 0,
+   "p99_ms": 6.3,
+   "by_deployment": {
+    "mixtral-8x7b": 59,
+    "claude-instant-v1": 53,
+    "yi-34b": 167,
+    "gpt-3.5-turbo-1106": 114,
+    "wizardlm-13b": 1,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 6,
+   "sent": 418,
+   "ok": 418,
+   "errors": 0,
+   "p99_ms": 5.4,
+   "by_deployment": {
+    "mixtral-8x7b": 64,
+    "gpt-3.5-turbo-1106": 133,
+    "yi-34b": 154,
+    "claude-instant-v1": 67
+   }
+  },
+  {
+   "t": 7,
+   "sent": 426,
+   "ok": 426,
+   "errors": 0,
+   "p99_ms": 6.9,
+   "by_deployment": {
+    "mixtral-8x7b": 55,
+    "gpt-3.5-turbo-1106": 152,
+    "yi-34b": 164,
+    "gpt-4-1106-preview": 3,
+    "claude-instant-v1": 49,
+    "llama-2-70b": 1,
+    "mistral-7b": 1,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 8,
+   "sent": 416,
+   "ok": 416,
+   "errors": 0,
+   "p99_ms": 24.9,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 111,
+    "yi-34b": 178,
+    "mixtral-8x7b": 70,
+    "claude-instant-v1": 55,
+    "wizardlm-13b": 1,
+    "codellama-34b": 1
+   }
+  },
+  {
+   "t": 9,
+   "sent": 410,
+   "ok": 410,
+   "errors": 0,
+   "p99_ms": 5.5,
+   "by_deployment": {
+    "yi-34b": 161,
+    "claude-instant-v1": 49,
+    "mixtral-8x7b": 57,
+    "gpt-3.5-turbo-1106": 143
+   }
+  },
+  {
+   "t": 10,
+   "sent": 413,
+   "ok": 413,
+   "errors": 0,
+   "p99_ms": 6.0,
+   "by_deployment": {
+    "claude-instant-v1": 54,
+    "yi-34b": 174,
+    "gpt-3.5-turbo-1106": 125,
+    "mixtral-8x7b": 58,
+    "gpt-4-1106-preview": 1,
+    "llama-2-70b": 1
+   }
+  },
+  {
+   "t": 11,
+   "sent": 396,
+   "ok": 396,
+   "errors": 0,
+   "p99_ms": 4.9,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 120,
+    "claude-instant-v1": 58,
+    "yi-34b": 151,
+    "mixtral-8x7b": 62,
+    "gpt-4-1106-preview": 3,
+    "llama-2-70b": 1,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 12,
+   "sent": 408,
+   "ok": 408,
+   "errors": 0,
+   "p99_ms": 5.7,
+   "by_deployment": {
+    "yi-34b": 172,
+    "claude-instant-v1": 51,
+    "gpt-3.5-turbo-1106": 126,
+    "mixtral-8x7b": 57,
+    "wizardlm-13b": 1,
+    "gpt-4-1106-preview": 1
+   }
+  },
+  {
+   "t": 13,
+   "sent": 390,
+   "ok": 390,
+   "errors": 0,
+   "p99_ms": 7.5,
+   "by_deployment": {
+    "yi-34b": 150,
+    "gpt-3.5-turbo-1106": 133,
+    "mixtral-8x7b": 58,
+    "claude-instant-v1": 49
+   }
+  },
+  {
+   "t": 14,
+   "sent": 364,
+   "ok": 364,
+   "errors": 0,
+   "p99_ms": 5.9,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 110,
+    "claude-instant-v1": 46,
+    "yi-34b": 164,
+    "mixtral-8x7b": 41,
+    "mistral-7b": 2,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 15,
+   "sent": 389,
+   "ok": 389,
+   "errors": 0,
+   "p99_ms": 30.3,
+   "by_deployment": {
+    "yi-34b": 165,
+    "claude-instant-v1": 53,
+    "gpt-3.5-turbo-1106": 107,
+    "mixtral-8x7b": 60,
+    "wizardlm-13b": 2,
+    "gpt-4-1106-preview": 1,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 16,
+   "sent": 381,
+   "ok": 381,
+   "errors": 0,
+   "p99_ms": 7.4,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 107,
+    "yi-34b": 165,
+    "mixtral-8x7b": 55,
+    "claude-instant-v1": 51,
+    "mistral-7b": 1,
+    "gpt-4-1106-preview": 1,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 17,
+   "sent": 383,
+   "ok": 383,
+   "errors": 0,
+   "p99_ms": 5.7,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 128,
+    "claude-instant-v1": 47,
+    "mixtral-8x7b": 55,
+    "yi-34b": 152,
+    "llama-2-70b": 1
+   }
+  },
+  {
+   "t": 18,
+   "sent": 401,
+   "ok": 401,
+   "errors": 0,
+   "p99_ms": 6.0,
+   "by_deployment": {
+    "yi-34b": 171,
+    "claude-instant-v1": 35,
+    "gpt-3.5-turbo-1106": 135,
+    "mixtral-8x7b": 58,
+    "mistral-7b": 1,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 19,
+   "sent": 422,
+   "ok": 422,
+   "errors": 0,
+   "p99_ms": 6.2,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 133,
+    "claude-instant-v1": 44,
+    "yi-34b": 166,
+    "mixtral-8x7b": 75,
+    "mistral-7b": 3,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 20,
+   "sent": 424,
+   "ok": 424,
+   "errors": 0,
+   "p99_ms": 6.4,
+   "by_deployment": {
+    "claude-instant-v1": 55,
+    "mixtral-8x7b": 65,
+    "gpt-3.5-turbo-1106": 122,
+    "yi-34b": 178,
+    "gpt-4-1106-preview": 2,
+    "llama-2-70b": 1,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 21,
+   "sent": 374,
+   "ok": 374,
+   "errors": 0,
+   "p99_ms": 4.9,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 115,
+    "yi-34b": 141,
+    "claude-instant-v1": 58,
+    "mixtral-8x7b": 57,
+    "wizardlm-13b": 1,
+    "gpt-4-1106-preview": 2
+   }
+  },
+  {
+   "t": 22,
+   "sent": 423,
+   "ok": 423,
+   "errors": 0,
+   "p99_ms": 5.9,
+   "by_deployment": {
+    "yi-34b": 163,
+    "mixtral-8x7b": 56,
+    "claude-instant-v1": 51,
+    "gpt-3.5-turbo-1106": 151,
+    "mistral-7b": 1,
+    "gpt-4-1106-preview": 1
+   }
+  },
+  {
+   "t": 23,
+   "sent": 409,
+   "ok": 409,
+   "errors": 0,
+   "p99_ms": 44.5,
+   "by_deployment": {
+    "claude-instant-v1": 56,
+    "yi-34b": 173,
+    "gpt-3.5-turbo-1106": 119,
+    "mixtral-8x7b": 59,
+    "wizardlm-13b": 1,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 24,
+   "sent": 380,
+   "ok": 380,
+   "errors": 0,
+   "p99_ms": 5.6,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 114,
+    "yi-34b": 141,
+    "claude-instant-v1": 62,
+    "mixtral-8x7b": 63
+   }
+  },
+  {
+   "t": 25,
+   "sent": 400,
+   "ok": 400,
+   "errors": 0,
+   "p99_ms": 5.1,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 137,
+    "mixtral-8x7b": 56,
+    "claude-instant-v1": 53,
+    "yi-34b": 149,
+    "gpt-4-1106-preview": 3,
+    "llama-2-70b": 1,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 26,
+   "sent": 390,
+   "ok": 390,
+   "errors": 0,
+   "p99_ms": 6.5,
+   "by_deployment": {
+    "claude-instant-v1": 45,
+    "yi-34b": 164,
+    "gpt-3.5-turbo-1106": 127,
+    "mixtral-8x7b": 53,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 27,
+   "sent": 364,
+   "ok": 364,
+   "errors": 0,
+   "p99_ms": 4.7,
+   "by_deployment": {
+    "yi-34b": 147,
+    "claude-instant-v1": 42,
+    "mixtral-8x7b": 63,
+    "gpt-3.5-turbo-1106": 110,
+    "wizardlm-13b": 1,
+    "codellama-34b": 1
+   }
+  },
+  {
+   "t": 28,
+   "sent": 379,
+   "ok": 379,
+   "errors": 0,
+   "p99_ms": 4.5,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 129,
+    "yi-34b": 156,
+    "mixtral-8x7b": 43,
+    "claude-instant-v1": 49,
+    "gpt-4-1106-preview": 1,
+    "llama-2-70b": 1
+   }
+  },
+  {
+   "t": 29,
+   "sent": 429,
+   "ok": 429,
+   "errors": 0,
+   "p99_ms": 5.1,
+   "by_deployment": {
+    "yi-34b": 177,
+    "claude-instant-v1": 62,
+    "gpt-3.5-turbo-1106": 124,
+    "mixtral-8x7b": 62,
+    "gpt-4-1106-preview": 2,
+    "llama-2-70b": 1,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 30,
+   "sent": 392,
+   "ok": 392,
+   "errors": 0,
+   "p99_ms": 4.8,
+   "by_deployment": {
+    "mixtral-8x7b": 62,
+    "gpt-3.5-turbo-1106": 125,
+    "claude-instant-v1": 53,
+    "yi-34b": 149,
+    "gpt-4-1106-preview": 2,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 31,
+   "sent": 383,
+   "ok": 383,
+   "errors": 0,
+   "p99_ms": 4.9,
+   "by_deployment": {
+    "yi-34b": 163,
+    "mixtral-8x7b": 60,
+    "gpt-3.5-turbo-1106": 109,
+    "claude-instant-v1": 51
+   }
+  },
+  {
+   "t": 32,
+   "sent": 410,
+   "ok": 410,
+   "errors": 0,
+   "p99_ms": 6.2,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 147,
+    "yi-34b": 165,
+    "mixtral-8x7b": 51,
+    "claude-instant-v1": 46,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 33,
+   "sent": 395,
+   "ok": 395,
+   "errors": 0,
+   "p99_ms": 28.1,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 107,
+    "yi-34b": 178,
+    "mixtral-8x7b": 55,
+    "wizardlm-13b": 3,
+    "claude-instant-v1": 49,
+    "mistral-7b": 2,
+    "gpt-4-1106-preview": 1
+   }
+  },
+  {
+   "t": 34,
+   "sent": 379,
+   "ok": 379,
+   "errors": 0,
+   "p99_ms": 5.3,
+   "by_deployment": {
+    "mixtral-8x7b": 54,
+    "gpt-3.5-turbo-1106": 104,
+    "yi-34b": 167,
+    "claude-instant-v1": 52,
+    "mistral-7b": 1,
+    "gpt-4-1106-preview": 1
+   }
+  },
+  {
+   "t": 35,
+   "sent": 437,
+   "ok": 437,
+   "errors": 0,
+   "p99_ms": 5.6,
+   "by_deployment": {
+    "mixtral-8x7b": 65,
+    "gpt-3.5-turbo-1106": 136,
+    "yi-34b": 178,
+    "wizardlm-13b": 1,
+    "claude-instant-v1": 56,
+    "llama-2-70b": 1
+   }
+  },
+  {
+   "t": 36,
+   "sent": 357,
+   "ok": 357,
+   "errors": 0,
+   "p99_ms": 6.8,
+   "by_deployment": {
+    "yi-34b": 137,
+    "gpt-3.5-turbo-1106": 127,
+    "mixtral-8x7b": 52,
+    "claude-instant-v1": 40,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 37,
+   "sent": 409,
+   "ok": 409,
+   "errors": 0,
+   "p99_ms": 6.5,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 129,
+    "yi-34b": 173,
+    "mixtral-8x7b": 67,
+    "claude-instant-v1": 38,
+    "wizardlm-13b": 1,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 38,
+   "sent": 384,
+   "ok": 384,
+   "errors": 0,
+   "p99_ms": 7.9,
+   "by_deployment": {
+    "gpt-3.5-turbo-1106": 110,
+    "yi-34b": 150,
+    "mixtral-8x7b": 64,
+    "claude-instant-v1": 54,
+    "wizardlm-13b": 1,
+    "mistral-7b": 3,
+    "gpt-4-1106-preview": 1,
+    "llama-2-70b": 1
+   }
+  },
+  {
+   "t": 39,
+   "sent": 393,
+   "ok": 393,
+   "errors": 0,
+   "p99_ms": 5.0,
+   "by_deployment": {
+    "yi-34b": 152,
+    "gpt-3.5-turbo-1106": 130,
+    "mixtral-8x7b": 60,
+    "claude-instant-v1": 49,
+    "gpt-4-1106-preview": 1,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 40,
+   "sent": 397,
+   "ok": 397,
+   "errors": 0,
+   "p99_ms": 5.8,
+   "by_deployment": {
+    "yi-34b": 156,
+    "mixtral-8x7b": 58,
+    "gpt-3.5-turbo-1106": 130,
+    "claude-instant-v1": 50,
+    "gpt-4-1106-preview": 2,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 41,
+   "sent": 395,
+   "ok": 395,
+   "errors": 0,
+   "p99_ms": 5.5,
+   "by_deployment": {
+    "claude-instant-v1": 50,
+    "mixtral-8x7b": 55,
+    "gpt-3.5-turbo-1106": 125,
+    "yi-34b": 163,
+    "gpt-4-1106-preview": 1,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 42,
+   "sent": 429,
+   "ok": 429,
+   "errors": 0,
+   "p99_ms": 6.1,
+   "by_deployment": {
+    "yi-34b": 170,
+    "gpt-3.5-turbo-1106": 126,
+    "mixtral-8x7b": 65,
+    "claude-instant-v1": 67,
+    "mistral-7b": 1
+   }
+  },
+  {
+   "t": 43,
+   "sent": 420,
+   "ok": 420,
+   "errors": 0,
+   "p99_ms": 5.9,
+   "by_deployment": {
+    "mixtral-8x7b": 65,
+    "claude-instant-v1": 58,
+    "gpt-3.5-turbo-1106": 140,
+    "yi-34b": 155,
+    "gpt-4-1106-preview": 2
+   }
+  },
+  {
+   "t": 44,
+   "sent": 394,
+   "ok": 394,
+   "errors": 0,
+   "p99_ms": 5.2,
+   "by_deployment": {
+    "yi-34b": 167,
+    "claude-instant-v1": 42,
+    "gpt-3.5-turbo-1106": 136,
+    "mixtral-8x7b": 45,
+    "llama-2-70b": 1,
+    "mistral-7b": 1,
+    "gpt-4-1106-preview": 1,
+    "wizardlm-13b": 1
+   }
+  },
+  {
+   "t": 45,
+   "sent": 8,
+   "ok": 8,
+   "errors": 0,
+   "p99_ms": 14.5,
+   "by_deployment": {
+    "yi-34b": 2,
+    "claude-instant-v1": 2,
+    "mixtral-8x7b": 1,
+    "gpt-3.5-turbo-1106": 3
+   }
+  }
+ ],
+ "loadavg_1m_end": 1.076171875
+}

@@ -1,0 +1,1 @@
+{"router": "tfidf", "artifact_mb": 2.4, "threads": 1, "n": 1000, "p50_ms": 0.058, "p90_ms": 0.11, "p99_ms": 0.174, "mean_ms": 0.065, "loadavg_1m": 4.4}

@@ -29,12 +29,16 @@ serve with it. The calibrated numbers in [RESULTS.md](RESULTS.md) are exactly th
 
 | Model | Input | Notes |
 |---|---|---|
-| TF-IDF ridge | words/bigrams | no embedding model; strong lexical baseline |
+| TF-IDF ridge | words/bigrams | no embedding model; served by a NumPy transform (matches scikit-learn to 1e-12): 0.06 ms per decision |
 | kNN | bge-small embedding | k and shrinkage toward each model's prior tuned on val |
 | Logistic / MLP | embedding + log length | soft-label BCE, early stopping on val; NumPy forward at serve time |
 | kNN + MLP | both | averaged predictions; best AIQ and calibrated cost on every seed |
 
-All of them land within ~1 AIQ point of each other on random splits. The gap to the oracle is
+All of them land within ~1 AIQ point of each other on random splits. The ensemble is best on
+every seed, but the embedding costs ~45 ms of CPU per prompt (one core) and caps a 4-vCPU
+gateway process near 16 req/s; TF-IDF reaches the 95%-of-GPT-4 target at 36% of GPT-4's cost
+instead of 33% and lets one process serve 400 req/s at a 7.6 ms p99. Which one to run is a
+cost question, so both ship and the configs default to TF-IDF. The gap to the oracle is
 large (0.71 vs 0.92 AIQ), but most of it is not learnable: on multiple-choice benchmarks a weak
 model is right by chance on a quarter of the prompts, and no router can know which quarter.
 
@@ -86,7 +90,8 @@ client ─▶ auth ─▶ rate limit ─▶ cache? ─▶ router (micro-batch: e
   fits does the request fail with 402. Redis Lua scripts make reserve and the token-bucket rate
   limit atomic across replicas.
 * **Micro-batching.** Concurrent requests' embeddings are computed together (up to 32, or 2 ms)
-  in a worker thread, so the event loop never blocks on ONNX.
+  in a worker thread, so the event loop never blocks on ONNX. Lexical routers skip it: they
+  score in ~0.1 ms, so the batching window would be most of their latency.
 * **Streaming** can fall back only until the first byte is sent; after that a failure is
   reported in-stream.
 * **Replay provider.** Serves the response each RouterBench model really gave, with injected
