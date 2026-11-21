@@ -6,6 +6,9 @@ name: bench
 on:
   workflow_dispatch:
     inputs:
+      router:
+        description: "Router to serve: knn+mlp (embeddings) or tfidf (lexical, no embedding model)"
+        default: "knn+mlp"
       rates:
         description: "Open-loop request rates to test (space-separated rps)"
         default: "50 100 200 400"
@@ -30,24 +33,32 @@ jobs:
           nproc; free -g; lscpu | grep -E "Model name|^CPU\(s\)" || true
       - name: Prepare data
         run: uv run modelrouter data prepare
+      - name: Cache embeddings
+        if: inputs.router != 'tfidf'
+        uses: actions/cache@v4
+        with:
+          path: artifacts/embeddings
+          key: embeddings-${{ hashFiles('src/modelrouter/features/embed.py', 'src/modelrouter/data/routerbench.py', 'src/modelrouter/data/gsm8k.py', 'uv.lock') }}
       - name: Embed
+        if: inputs.router != 'tfidf'
         run: uv run modelrouter embed
       - name: Train router and build replay fixture
         run: |
-          OMP_NUM_THREADS=4 uv run modelrouter train --router knn+mlp --split random-s0
+          OMP_NUM_THREADS=4 uv run modelrouter train --router "${{ inputs.router }}" \
+            --split random-s0 --out artifacts/routers/bench
           uv run modelrouter gateway build-replay --split random-s0 --part test
       - name: Start gateway
         run: |
           mkdir -p artifacts/logs results/load
           nohup uv run modelrouter serve --config deploy/gateway.replay.yaml --port 18080 \
-            > artifacts/logs/gateway.log 2>&1 &
+            --router-dir artifacts/routers/bench > artifacts/logs/gateway.log 2>&1 &
           for i in $(seq 1 120); do curl -sf localhost:18080/readyz && break; sleep 1; done
       - name: End-to-end decisions vs offline (closed loop, every test prompt)
         run: |
           mkdir -p results/e2e
           for lam in 31.6 300; do
             OMP_NUM_THREADS=4 uv run python bench/offline_point.py \
-              --router artifacts/routers/knn-mlp-random-s0 --lam $lam \
+              --router artifacts/routers/bench --lam $lam \
               --out results/e2e/offline-lam$lam.json
             uv run python bench/loadgen.py --fixture artifacts/replay/random-s0-test.jsonl.gz \
               --url http://127.0.0.1:18080 --concurrency 32 --lam $lam \
@@ -72,7 +83,8 @@ jobs:
           pkill -f "modelrouter serve" || true
           sleep 2
           nohup uv run modelrouter serve --config deploy/gateway.replay.yaml --port 18080 \
-            --max-attempts 1 > artifacts/logs/gateway-nofallback.log 2>&1 &
+            --router-dir artifacts/routers/bench --max-attempts 1 \
+            > artifacts/logs/gateway-nofallback.log 2>&1 &
           for i in $(seq 1 120); do curl -sf localhost:18080/readyz && break; sleep 1; done
           uv run python bench/loadgen.py --fixture artifacts/replay/random-s0-test.jsonl.gz \
             --url http://127.0.0.1:18080 --rate 100 --duration 60 --lam 31.6 \
@@ -83,7 +95,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: bench-results
+          name: bench-results-${{ inputs.router == 'tfidf' && 'tfidf' || 'knn-mlp' }}
           path: |
             results/load
             results/e2e

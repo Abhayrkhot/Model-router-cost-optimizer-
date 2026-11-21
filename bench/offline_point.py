@@ -29,11 +29,11 @@ def main() -> None:
     a = p.parse_args()
 
     ds = RoutingDataset.load(a.dataset)
-    emb = cached_embeddings(ds.text, a.cache)
     split = random_split(ds, int(a.split.removeprefix("random-s")))
     test = ds.subset(split.test)
     qm, cm, _ = load_router(a.router)
-    q_hat = qm.predict(Inputs.from_dataset(test, emb[split.test]))
+    emb = None if qm.kind == "tfidf" else cached_embeddings(ds.text, a.cache)[split.test]
+    q_hat = qm.predict(Inputs.from_dataset(test, emb))
     c_hat = cm.predict(test.prompt_chars)
     choice = route(q_hat, c_hat, a.lam)
     rows = np.arange(len(test))

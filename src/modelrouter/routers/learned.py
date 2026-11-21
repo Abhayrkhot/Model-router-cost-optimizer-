@@ -6,7 +6,9 @@ benchmarks are graded), so the torch models train with binary cross-entropy on s
 
 from __future__ import annotations
 
+import itertools
 import math
+import re
 from typing import Any, ClassVar
 
 import numpy as np
@@ -225,7 +227,10 @@ def _gelu_tanh(x: F32) -> F32:
 class TfidfQuality(QualityModel):
     """TF-IDF word/bigram features + multi-output ridge regression, clipped to [0, 1].
 
-    A cheap lexical baseline: no embedding model, trains in seconds.
+    A cheap lexical router: no embedding model, sub-millisecond inference.  Training uses
+    scikit-learn; serving uses `_TfidfTransform`, a NumPy re-implementation of the fitted
+    vectorizer (same tokenizer, sublinear tf, idf, l2 norm) so the gateway needs neither
+    scikit-learn nor an ONNX model.  `tests/test_routers.py` checks the two agree.
     """
 
     kind: ClassVar[str] = "tfidf"
@@ -234,8 +239,9 @@ class TfidfQuality(QualityModel):
         self.models = models
         self.max_features = max_features
         self.alpha = 1.0
-        self._vec: Any = None
-        self._ridge: Any = None
+        self.transform: _TfidfTransform | None = None
+        self.coef = np.zeros((len(models), 0), dtype=np.float32)
+        self.intercept = np.zeros(len(models))
 
     def fit(
         self, train: Inputs, q_train: FloatArray, val: Inputs, q_val: FloatArray
@@ -243,11 +249,11 @@ class TfidfQuality(QualityModel):
         from sklearn.feature_extraction.text import TfidfVectorizer
         from sklearn.linear_model import Ridge
 
-        self._vec = TfidfVectorizer(
+        vec = TfidfVectorizer(
             ngram_range=(1, 2), max_features=self.max_features, sublinear_tf=True, min_df=2
         )
-        xt = self._vec.fit_transform(train.text)
-        xv = self._vec.transform(val.text)
+        xt = vec.fit_transform(train.text)
+        xv = vec.transform(val.text)
         best = (math.inf, 1.0)
         for alpha in (0.3, 1.0, 3.0, 10.0):
             pred = Ridge(alpha=alpha).fit(xt, q_train).predict(xv)
@@ -255,12 +261,73 @@ class TfidfQuality(QualityModel):
             if mse < best[0]:
                 best = (mse, alpha)
         self.alpha = best[1]
-        self._ridge = Ridge(alpha=self.alpha).fit(xt, q_train)
+        ridge = Ridge(alpha=self.alpha).fit(xt, q_train)
+        terms = sorted(vec.vocabulary_, key=vec.vocabulary_.__getitem__)
+        self.transform = _TfidfTransform(terms, vec.idf_.astype(np.float64))
+        self.coef = ridge.coef_.astype(np.float32)
+        self.intercept = np.asarray(ridge.intercept_, dtype=np.float64)
         return self
 
     def predict(self, x: Inputs) -> FloatArray:
-        out: FloatArray = np.clip(self._ridge.predict(self._vec.transform(x.text)), 0.0, 1.0)
-        return out
+        assert self.transform is not None, "fit or load the router first"
+        out = np.empty((len(x), len(self.models)))
+        for i, text in enumerate(x.text):
+            idx, val = self.transform.row(text)
+            out[i] = self.coef[:, idx] @ val + self.intercept
+        clipped: FloatArray = np.clip(out, 0.0, 1.0)
+        return clipped
+
+    def config(self) -> dict[str, Any]:
+        return {"alpha": self.alpha, "max_features": self.max_features}
+
+    def arrays(self) -> dict[str, npt.NDArray[Any]]:
+        assert self.transform is not None
+        return {
+            "terms": np.array(self.transform.terms, dtype=np.str_),
+            "idf": self.transform.idf,
+            "coef": self.coef,
+            "intercept": self.intercept,
+        }
+
+    @classmethod
+    def from_saved(
+        cls, models: tuple[str, ...], config: dict[str, Any], arrays: dict[str, npt.NDArray[Any]]
+    ) -> TfidfQuality:
+        m = cls(models, max_features=int(config["max_features"]))
+        m.alpha = float(config["alpha"])
+        m.transform = _TfidfTransform([str(t) for t in arrays["terms"]], arrays["idf"])
+        m.coef = arrays["coef"].astype(np.float32)
+        m.intercept = arrays["intercept"].astype(np.float64)
+        return m
+
+
+# scikit-learn's default analyzer: lowercase, tokens of 2+ word characters, then n-grams.
+_TOKEN = re.compile(r"(?u)\b\w\w+\b")
+
+
+class _TfidfTransform:
+    """NumPy equivalent of a fitted TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True)."""
+
+    def __init__(self, terms: list[str], idf: FloatArray) -> None:
+        self.terms = terms
+        self.index = {t: i for i, t in enumerate(terms)}
+        self.idf = idf
+
+    def row(self, text: str) -> tuple[npt.NDArray[np.int64], FloatArray]:
+        tokens = _TOKEN.findall(text.lower())
+        grams = tokens + [f"{a} {b}" for a, b in itertools.pairwise(tokens)]
+        counts: dict[int, int] = {}
+        for g in grams:
+            j = self.index.get(g)
+            if j is not None:
+                counts[j] = counts.get(j, 0) + 1
+        if not counts:
+            return np.zeros(0, dtype=np.int64), np.zeros(0)
+        idx = np.fromiter(counts.keys(), dtype=np.int64, count=len(counts))
+        tf = np.fromiter(counts.values(), dtype=np.float64, count=len(counts))
+        val = (1.0 + np.log(tf)) * self.idf[idx]
+        val /= np.linalg.norm(val)
+        return idx, val
 
 
 @register

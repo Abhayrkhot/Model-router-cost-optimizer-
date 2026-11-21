@@ -74,6 +74,7 @@ def test_mlp_numpy_forward_matches_torch(split_inputs):
     [
         lambda m: KNNQuality(m),
         lambda m: MLPQuality(m, hidden=8, epochs=3),
+        lambda m: TfidfQuality(m),
         lambda m: EnsembleQuality(m, [KNNQuality(m), MLPQuality(m, hidden=8, epochs=3)]),
     ],
 )
@@ -150,3 +151,25 @@ def test_saved_router_loads_in_a_fresh_interpreter(tmp_path, split_inputs):
     )
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
     assert out.stdout.strip() == "ensemble"
+
+
+def test_tfidf_numpy_transform_matches_sklearn():
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
+    from modelrouter.routers.learned import _TfidfTransform
+
+    docs = [
+        "Write a Python function to reverse a linked list.",
+        "What is the capital of Australia? A) Sydney B) Canberra",
+        "Natalia sold clips to 48 of her friends in April, and half as many in May.",
+        "Ünïcödé wörds and CamelCase tokens, plus repeated repeated repeated words.",
+    ] * 3
+    vec = TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True, min_df=1).fit(docs)
+    terms = sorted(vec.vocabulary_, key=vec.vocabulary_.__getitem__)
+    ours = _TfidfTransform(terms, vec.idf_)
+    ref = vec.transform(docs).toarray()
+    for i, d in enumerate(docs):
+        idx, val = ours.row(d)
+        dense = np.zeros(len(terms))
+        dense[idx] = val
+        np.testing.assert_allclose(dense, ref[i], atol=1e-12)

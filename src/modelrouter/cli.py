@@ -235,14 +235,15 @@ def train(
     from modelrouter.routers.base import CostModel, Inputs, save_router
 
     ds = RoutingDataset.load(dataset)
-    emb = cached_embeddings(ds.text, cache_dir)
+    # Lexical routers need no embeddings (and the gateway then loads no embedding model).
+    emb = None if router == "tfidf" else cached_embeddings(ds.text, cache_dir)
     sp = _split_by_name(ds, split)
     spec = _router_specs([router])[0]
     tr, va = ds.subset(sp.train), ds.subset(sp.val)
     qm = spec.factory(ds.models).fit(
-        Inputs.from_dataset(tr, emb[sp.train]),
+        Inputs.from_dataset(tr, None if emb is None else emb[sp.train]),
         tr.quality,
-        Inputs.from_dataset(va, emb[sp.val]),
+        Inputs.from_dataset(va, None if emb is None else emb[sp.val]),
         va.quality,
     )
     cm = CostModel(ds.models).fit(tr.prompt_chars, tr.cost)
@@ -305,6 +306,7 @@ def serve(
     max_attempts: Annotated[
         int | None, typer.Option(help="Override max_attempts (1 disables fallback).")
     ] = None,
+    router_dir: Annotated[Path | None, typer.Option(help="Override router_dir.")] = None,
 ) -> None:
     """Run the gateway (one process; scale out with replicas)."""
     import os
@@ -319,6 +321,8 @@ def serve(
         cfg.redis_url = os.environ["MODELROUTER_REDIS_URL"]
     if max_attempts is not None:
         cfg.max_attempts = max_attempts
+    if router_dir is not None:
+        cfg.router_dir = router_dir.resolve()
     uvicorn.run(create_app(cfg), host=host, port=port, log_level=log_level, access_log=False)
 
 
